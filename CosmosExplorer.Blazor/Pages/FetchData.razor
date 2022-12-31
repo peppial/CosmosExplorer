@@ -1,47 +1,148 @@
 ﻿@page "/fetchdata"
 
-@using CosmosExplorer.Blazor.Data
+@using CosmosExplorer.Blazor.Services
 @inject WeatherForecastService ForecastService
+@inject StateContainer stateContainer
 
 <h1>Weather forecast</h1>
 
 <p>This component demonstrates fetching data from a service.</p>
 
-@if (forecasts == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var forecast in forecasts)
+
+
+<div id="wrapper">
+    <div id="div1">
+        @if (forecasts == null)
+        {
+
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Database</th>
+                        <th>Container</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var forecast in forecasts)
+                    {
+                        var style = "";
+                        if (forecast.Container == stateContainer.Container) style = "background-color:#f0f0f0;";
+                        <tr style="@style" @onclick="() => SelectContainerAsync(forecast.Database,forecast.Container)">
+                            <td>@forecast.Database</td>
+                            <td>@forecast.Container</td>
+                        </tr>
+                        }
+                    </tbody>
+            </table>
+
+            <p>
+                <b>SELECT * FROM c </b>
+
+                <textarea @bind="query" placeholder="Enter query" cols="80" rows="5"></textarea>
+            </p>
+
+            <p></p>
+            <button class="btn btn-primary" @onclick="QueryAsync">Query</button>
+
+        }
+        <p>
+
+            @if (result != null)
             {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
-                </tr>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var (id, partitionKey) in result)
+                            {
+                                var style = "";
+                                if (id == selectedId) style = "background-color:#f0f0f0;";
+                            <tr style="@style">
+                                <td @onclick="() => SelectDocumentAsync(id, partitionKey)">@id</td>
+
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             }
-        </tbody>
-    </table>
-}
+        </p>
+    </div>
+    <div id="div2">
+        <p>
 
+            @if (loading)
+            {
+                <em style="color:red">
+                    Loading...
+                </em>
+            }
+            &nbsp;</p>
+        <p>
+            <textarea @bind="documentString" cols="80" rows="30"></textarea>
+
+        </p>
+    </div>
+</div>
+<style>
+    #wrapper {
+    }
+
+    #div1 {
+        display: inline-block;
+        width: 600px;
+    }
+
+    #div2 {
+        display: inline-block;
+        vertical-align: top;
+        width: 600px;
+    }
+</style>
 @code {
-    private WeatherForecast[] forecasts;
-
+    private IEnumerable<WeatherForecast> forecasts;
+    private string query;
+    private IEnumerable<(string, string)> result;
+    private string documentString;
+    private string selectedId;
+    private bool loading = false;
     protected override async Task OnInitializedAsync()
     {
+        loading = true;
         forecasts = await ForecastService.GetForecastAsync(DateTime.Now);
+        loading = false;
+    }
+
+    public async Task QueryAsync()
+    {
+        loading = true;
+        result = await ForecastService.QueryAsync(query);
+        loading = false;
+    }
+
+    public async Task SelectDocumentAsync(string id, string partitionKey)
+    {
+        documentString = "";
+        selectedId = id;
+        loading = true;
+        documentString = await ForecastService.GetDocumentAsync(id, partitionKey);
+        loading = false;
+    }
+
+    public async Task SelectContainerAsync(string databaseName, string containerName)
+    {
+        documentString = "";
+        result = null;
+
+        loading = true;
+        ForecastService.SelectContainer(databaseName, containerName);
+        result = await ForecastService.QueryAsync("");
+        loading = false;
     }
 }
 

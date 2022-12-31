@@ -11,9 +11,11 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Connection\" />
+    <None Remove="Query\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Connection\" />
+    <Folder Include="Query\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.31.2" />

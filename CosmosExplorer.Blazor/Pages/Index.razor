@@ -1,8 +1,25 @@
 ﻿@page "/"
+@inject StateContainer stateContainer
 
-<h1>Hello, world!</h1>
+<h2>Cosmos Explorer</h2>
 
-Welcome to your new app.
+<p>
+    <textarea @bind="connectionString" placeholder="Cosmos connection string" cols="80" rows="5"></textarea>
+</p>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+<button class="btn btn-primary" @onclick="SaveAsync">Save</button>
+@code {
+    private string connectionString { get; set; } = "";
 
+
+    protected override async Task OnInitializedAsync()
+    {
+        connectionString =  stateContainer.ConnectionString;
+    }
+
+    private async Task SaveAsync()
+    {
+        stateContainer.ConnectionString = connectionString;
+    }
+
+}

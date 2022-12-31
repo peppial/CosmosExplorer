@@ -1,7 +1,8 @@
-﻿namespace CosmosExplorer.Domain;
+﻿namespace CosmosExplorer.Domain.Connection;
 
 public interface IConnectionService
 {
-    public Task<string> GetDataAsync();
+    public Task<IList<DatabaseModel>> GetDatabasesAsync(string connectionString, CancellationToken cancellationToken);
+
 }
 

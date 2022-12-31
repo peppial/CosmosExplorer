@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
-using CosmosExplorer.Blazor.Data;
+using CosmosExplorer.Blazor.Services;
 using CosmosExplorer.Domain;
+using CosmosExplorer.Domain.Connection;
+using CosmosExplorer.Domain.Query;
 
 namespace CosmosExplorer.Blazor;
 
@@ -24,8 +26,11 @@ public static class MauiProgram
 #endif
 
 		builder.Services.AddSingleton<WeatherForecastService>();
-        builder.Services.AddTransient<IConnectionService,ConnectionService>();
 
+        builder.Services.AddSingleton<StateContainer>();
+        builder.Services.AddSingleton<Client>();
+        builder.Services.AddScoped<IConnectionService,ConnectionService>();
+        builder.Services.AddScoped<IQueryService, QueryService>();
         return builder.Build();
 	}
 }
