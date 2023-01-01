@@ -43,7 +43,7 @@ jobs:
 
     - name: Restore NuGet packages
       shell: pwsh
-      run: dotnet restore ${{ env.PROJECT_PATH }} --configfile ${{ env.NUGETCONFIG_PATH }}
+      run: dotnet restore ${{ env.PROJECT_PATH }} 
     
     - name: Publish Maui WinUI project x64
       shell: pwsh
