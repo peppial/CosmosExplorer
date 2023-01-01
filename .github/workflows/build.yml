@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
  
 env:
-  PROJECT_PATH: "CosmosExplorer/CosmosExplorer.Blazor/CosmosExplorer.Blazor.csproj"
+  PROJECT_PATH: "CosmosExplorer.Blazor/CosmosExplorer.Blazor.csproj"
   NUGETCONFIG_PATH: "nuget.config"
   RELEASE_VERSION: ${{ github.ref_name }}
   
