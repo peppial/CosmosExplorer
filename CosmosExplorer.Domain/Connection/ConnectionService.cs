@@ -4,18 +4,36 @@ using Microsoft.Azure.Cosmos;
 
 namespace CosmosExplorer.Domain.Connection;
 
-public class ConnectionService : IConnectionService
+public class ConnectionService : IConnectionService, IDisposable
 {
-    private readonly Client client;
+    public CosmosClient? cosmosClient { get; private set; }
 
-    public ConnectionService(Client client)
+    public DatabaseProperties? databaseProperties { get; private set; }
+    public ContainerProperties? containerProperties { get; private set; }
+    public Database? database { get; private set; }
+    public Container? container { get; private set; }
+    private string? connectionString { get; set; }
+
+
+    public async Task ChangeContainerAsync(string connectionString, string databaseName, string containerName)
     {
-        this.client = client ?? throw new ArgumentNullException(nameof(client));
+        cosmosClient = new Microsoft.Azure.Cosmos.CosmosClient(connectionString);
+        this.connectionString = connectionString;
+        database = cosmosClient.GetDatabase(databaseName);
+        databaseProperties = await database.ReadAsync();
+        container = cosmosClient.GetContainer(databaseName, containerName);
+        containerProperties = await container.ReadContainerAsync();
+
     }
     public async Task<IList<DatabaseModel>> GetDatabasesAsync(string connectionString, CancellationToken cancellationToken)
     {
-        client.OpenConnectionAsync(connectionString);
-        var databaseProperties = client.Default!.GetDatabaseQueryIterator<DatabaseProperties>();
+
+        if (cosmosClient == null || this.connectionString != connectionString)
+        {
+            cosmosClient = new Microsoft.Azure.Cosmos.CosmosClient(connectionString);
+            this.connectionString = connectionString;
+        }
+        var databaseProperties = cosmosClient.GetDatabaseQueryIterator<DatabaseProperties>();
         var databases = new List<DatabaseModel>();
 
         while (databaseProperties.HasMoreResults)
@@ -24,7 +42,7 @@ public class ConnectionService : IConnectionService
 
             foreach (var databaseProperty in feedResponseDatabase)
             {
-                var database = client.Default.GetDatabase(databaseProperty.Id);
+                var database = cosmosClient.GetDatabase(databaseProperty.Id);
 
 
                 DatabaseModel databaseModel = new DatabaseModel { Id = database.Id };
@@ -54,5 +72,9 @@ public class ConnectionService : IConnectionService
         
     }
 
+    public void Dispose()
+    {
+        if (cosmosClient != null) cosmosClient.Dispose();
+    }
 }
 

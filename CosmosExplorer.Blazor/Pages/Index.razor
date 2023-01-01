@@ -4,22 +4,61 @@
 <h2>Cosmos Explorer</h2>
 
 <p>
+    <input @bind="connectionStringName" placeholder="Name of the connection string" />
+</p>
+<p>
     <textarea @bind="connectionString" placeholder="Cosmos connection string" cols="80" rows="5"></textarea>
 </p>
 
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Connection string</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in stateContainer.ConnectionStrings)
+        {
+            var style = "";
+            if (item.ConnectionString == stateContainer.ConnectionString) style = "background-color:#def0ff;";
+            <tr style="@style" @onclick="() => SelectConnectionStringAsync(item.ConnectionString)">
+                <td >@item.Name</td>
+                <td>@item.ConnectionString</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<button class="btn btn-primary" @onclick="ClearAllAsync">Clear all</button>
 <button class="btn btn-primary" @onclick="SaveAsync">Save</button>
 @code {
+    private string connectionStringName { get; set; } = "";
     private string connectionString { get; set; } = "";
-
 
     protected override async Task OnInitializedAsync()
     {
-        connectionString =  stateContainer.ConnectionString;
     }
 
     private async Task SaveAsync()
     {
         stateContainer.ConnectionString = connectionString;
+        var strings = stateContainer.ConnectionStrings;
+        strings.Add(new PreferenceConnectionString { Name = connectionStringName, ConnectionString = connectionString, Selected = true });
+        stateContainer.ConnectionStrings = strings;
+        connectionStringName = "";
+        connectionString = "";
     }
+
+    private async Task SelectConnectionStringAsync(string connectionString)
+    {
+        stateContainer.ConnectionString = connectionString;
+    }
+
+    private async Task ClearAllAsync()
+    {
+        stateContainer.ConnectionStrings = new List<PreferenceConnectionString>();
+    }
+
 
 }

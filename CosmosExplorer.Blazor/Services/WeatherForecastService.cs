@@ -18,38 +18,33 @@ public class WeatherForecastService
         this.connectionService = connectionService ?? throw new ArgumentNullException(nameof(connectionService));
         this.queryService = queryService ?? throw new ArgumentNullException(nameof(queryService));
         this.stateContainer = stateContainer ?? throw new ArgumentNullException(nameof(stateContainer));
+
     }
 
-	public async Task<IEnumerable<WeatherForecast>> GetForecastAsync(DateTime startDate)
+	public async Task<IEnumerable<DatabaseModel>> GetDatabasesAsync()
 	{
-		var databases = await connectionService.GetDatabasesAsync(stateContainer.ConnectionString, new CancellationToken());
+        stateContainer.Database = "";
+        stateContainer.Container = "";
 
-		stateContainer.Database = databases[0].Id;
-		stateContainer.Container = databases[0].Containers[0].Id;
+		return await connectionService.GetDatabasesAsync(stateContainer.ConnectionString, new CancellationToken());
 
-		var result = new List<WeatherForecast>();
-		foreach(var database in databases)
-		{
-			foreach (var container in database.Containers) result.Add(new WeatherForecast { Container = container.Id, Database = database.Id });
-		}
-		return result;
 	}
-    public void SelectContainer(string databaseName, string containerName)
+    public async Task ChangeContainerAsync(string databaseName, string containerName)
     {
         stateContainer.Database = databaseName;
         stateContainer.Container = containerName;
-    
+        await connectionService.ChangeContainerAsync(stateContainer.ConnectionString,databaseName, containerName);  
 	}
     public async Task<IEnumerable<(string, string)>> QueryAsync(string query)
     {
-        var result = await queryService.QueryAsync(stateContainer.ConnectionString, stateContainer.Database, stateContainer.Container, null, query, 100, new CancellationToken());
+        var result = await queryService.QueryAsync(null, query, 100, new CancellationToken());
 
         return result.Items.Select(i => (i.Id, i.PartitionKey));
 
     }
     public async Task<string> GetDocumentAsync(string id, string partitionKey)
     {
-        return await queryService.GetDocumentAsync(stateContainer.ConnectionString, stateContainer.Database, stateContainer.Container, partitionKey, id);
+        return await queryService.GetDocumentAsync(partitionKey, id);
 
     }
 }

@@ -3,7 +3,9 @@
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
-
+input, textarea {
+   border:solid 1px;
+}
 h1:focus {
     outline: none;
 }

@@ -51,6 +51,8 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.31.2" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
+        <PackageReference Include="MudBlazor" Version="6.1.6" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     </ItemGroup>
 
     <ItemGroup>
@@ -61,5 +63,10 @@
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\CosmosExplorer.Domain\CosmosExplorer.Domain.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Remove="Blazoring.JsonEditor" />
+      <None Remove="MudBlazor" />
+      <None Remove="Newtonsoft.Json" />
     </ItemGroup>
 </Project>

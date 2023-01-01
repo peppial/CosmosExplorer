@@ -12,36 +12,20 @@
 
 <div id="wrapper">
     <div id="div1">
-        @if (forecasts == null)
+        @if (TreeItems.Count > 0)
         {
 
-        }
-        else
-        {
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Database</th>
-                        <th>Container</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var forecast in forecasts)
-                    {
-                        var style = "";
-                        if (forecast.Container == stateContainer.Container) style = "background-color:#f0f0f0;";
-                        <tr style="@style" @onclick="() => SelectContainerAsync(forecast.Database,forecast.Container)">
-                            <td>@forecast.Database</td>
-                            <td>@forecast.Container</td>
-                        </tr>
-                        }
-                    </tbody>
-            </table>
-
+            <p>
+                <MudTreeView ServerData="LoadServerData" Items="TreeItems">
+                    <ItemTemplate>
+                        <MudTreeViewItem Value="@context" Style="@(context.Container == stateContainer.Container?"background-color:#def0ff;":"")" LoadingIconColor="Color.Info" Text="@context.Title" @onclick="() => SelectContainerAsync(context.Database,context.Container)" />
+                    </ItemTemplate>
+                </MudTreeView>
+            </p>
             <p>
                 <b>SELECT * FROM c </b>
 
-                <textarea @bind="query" placeholder="Enter query" cols="80" rows="5"></textarea>
+                <textarea @bind="query" placeholder="Enter query" cols="80" rows="5" autofocus="autofocus" style="border:solid 1px"></textarea>
             </p>
 
             <p></p>
@@ -56,16 +40,17 @@
                     <thead>
                         <tr>
                             <th>Id</th>
+                            <th>Partition Key</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var (id, partitionKey) in result)
-                            {
-                                var style = "";
-                                if (id == selectedId) style = "background-color:#f0f0f0;";
+                        {
+                            var style = "";
+                            if (id == selectedId) style = "background-color:#def0ff;";
                             <tr style="@style">
                                 <td @onclick="() => SelectDocumentAsync(id, partitionKey)">@id</td>
-
+                                <td>@partitionKey</td>
                             </tr>
                         }
                     </tbody>
@@ -82,9 +67,10 @@
                     Loading...
                 </em>
             }
-            &nbsp;</p>
+            &nbsp;
+        </p>
         <p>
-            <textarea @bind="documentString" cols="80" rows="30"></textarea>
+            <textarea @bind="documentString" cols="80" rows="30" autofocus="autofocus"></textarea>
 
         </p>
     </div>
@@ -104,8 +90,34 @@
         width: 600px;
     }
 </style>
+
 @code {
-    private IEnumerable<WeatherForecast> forecasts;
+
+    private HashSet<TreeItemData> TreeItems { get; set; } = new HashSet<TreeItemData>();
+
+    public class TreeItemData
+    {
+        public string Title { get; set; }
+
+        public string Container { get; set; }
+
+        public string Database { get; set; }
+
+        public bool CanExpand { get; set; } = false;
+
+        public HashSet<TreeItemData> TreeItems { get; set; }
+
+
+    }
+
+
+
+    public async Task<HashSet<TreeItemData>> LoadServerData(TreeItemData parentNode)
+    {
+        await Task.Delay(500);
+        return parentNode.TreeItems;
+    }
+    private IEnumerable<Domain.Connection.DatabaseModel> databases;
     private string query;
     private IEnumerable<(string, string)> result;
     private string documentString;
@@ -114,7 +126,21 @@
     protected override async Task OnInitializedAsync()
     {
         loading = true;
-        forecasts = await ForecastService.GetForecastAsync(DateTime.Now);
+        databases = await ForecastService.GetDatabasesAsync();
+
+        foreach (var database in databases)
+        {
+            var item = new TreeItemData { Title = database.Id, Database = database.Id, Container = null, CanExpand = true };
+            item.TreeItems = new HashSet<TreeItemData>();
+            var ordered = database.Containers.OrderBy(c => c.Id).ToList();
+            foreach (var container in ordered)
+            {
+                item.TreeItems.Add(new TreeItemData { Title = container.Id, Database = database.Id, Container = container.Id, CanExpand = false });
+            }
+            TreeItems.Add(item);
+
+        }
+
         loading = false;
     }
 
@@ -136,13 +162,17 @@
 
     public async Task SelectContainerAsync(string databaseName, string containerName)
     {
+        if (containerName is null) return;
+
         documentString = "";
         result = null;
 
         loading = true;
-        ForecastService.SelectContainer(databaseName, containerName);
+        await ForecastService.ChangeContainerAsync(databaseName, containerName);
         result = await ForecastService.QueryAsync("");
         loading = false;
     }
+
+
 }
 

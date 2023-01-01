@@ -11,32 +11,25 @@ namespace CosmosExplorer.Domain.Query
 {
     public class QueryService : IQueryService
     {
-        private readonly Client client;
+        private readonly IConnectionService connectionService;
 
-        public QueryService(Client client)
+        public QueryService(IConnectionService connectionService)
         {
-            this.client = client ?? throw new ArgumentNullException(nameof(client));
+            this.connectionService = connectionService ?? throw new ArgumentNullException(nameof(connectionService));
         }
 
-        public async Task<string> GetDocumentAsync(string connectionString, string databaseName, string containerName, string partitionName, string id)
+        public async Task<string> GetDocumentAsync( string partitionName, string id)
         {
-            client.OpenConnectionAsync(connectionString);
-            Container container = client.Default!.GetContainer(databaseName, containerName);
-            //temp
-            var containerProperties = await container.ReadContainerAsync();
-
-            var response = await container.ReadItemAsync<dynamic>(id, new PartitionKey(partitionName));
+            
+            var response = await connectionService.container.ReadItemAsync<dynamic>(id, new PartitionKey(partitionName));
 
             return response.Resource.ToString();
         }
-        public async Task<QueryResultModel<IReadOnlyCollection<IDocumentModel>>> QueryAsync(string connectionString, string databaseName, string containerName, string partitionName, string filter, int maxItems, CancellationToken cancellationToken)
+        public async Task<QueryResultModel<IReadOnlyCollection<IDocumentModel>>> QueryAsync(string partitionName, string filter, int maxItems, CancellationToken cancellationToken)
         {
-            client.OpenConnectionAsync(connectionString);
-
-            Container container = client.Default!.GetContainer(databaseName, containerName);
-
+           
             var result = new QueryResultModel<IReadOnlyCollection<IDocumentModel>>();
-            var containerProperties = await container.ReadContainerAsync();
+            var containerProperties = await connectionService.container.ReadContainerAsync();
 
             var token = containerProperties.Resource.PartitionKeyPath;
             if (token != null)
@@ -54,7 +47,7 @@ namespace CosmosExplorer.Domain.Query
                 //PartitionKey = 
             };
 
-            using (var resultSet = container.GetItemQueryIterator<DocumentModel>(
+            using (var resultSet = connectionService.container.GetItemQueryIterator<DocumentModel>(
                 queryText: sql,
                 //continuationToken: continuationToken,
                 requestOptions: options))
