@@ -37,6 +37,15 @@ jobs:
         $buildDay = Get-Date -Format "yyyy.Mdd"
         $ver = $buildDay + "." + $env:GITHUB_RUN_NUMBER + ".0"
         echo "::set-output name=APP_VERSION::$ver"
+        
+    - name: Decrypt PFX file
+      run: |
+        echo "${{ secrets.WINDOWS_PFX_FILE }}" > cert.pfx.asc
+        certutil -decode cert.pfx.asc cert.pfx
+    - name: Add Cert to Store
+      run: |
+        certutil -user -q -p ${{ secrets.WINDOWS_PFX_PASSWORD }} -importpfx cert.pfx NoRoot
+        
     - name: Install MAUI workloads (required for GitHub-hosted runners)
       shell: pwsh
       run: dotnet workload install maui --source https://api.nuget.org/v3/index.json
@@ -48,7 +57,7 @@ jobs:
     - name: Publish Maui WinUI project x64
       shell: pwsh
       run: |
-        dotnet publish ${{ env.PROJECT_PATH }} -f net7.0-windows10.0.19041.0 -c Release /p:RuntimeIdentifierOverride=win10-x64 
+        dotnet publish ${{ env.PROJECT_PATH }} -f net7.0-windows10.0.19041.0 -c Release /p:RuntimeIdentifierOverride=win10-x64 /p:PackageCertificateThumbprint="${{ secrets.WINDOWS_PFX_THUMBPRINT }}"
         
     - name: Upload Windows Artifact x64
       uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
@@ -59,7 +68,7 @@ jobs:
     - name: Publish Maui WinUI project arm64
       shell: pwsh
       run: |
-        dotnet publish ${{ env.PROJECT_PATH }} -f net7.0-windows10.0.19041.0 -c Release /p:RuntimeIdentifierOverride=win10-arm64 
+        dotnet publish ${{ env.PROJECT_PATH }} -f net7.0-windows10.0.19041.0 -c Release /p:RuntimeIdentifierOverride=win10-arm64 /p:PackageCertificateThumbprint="${{ secrets.WINDOWS_PFX_THUMBPRINT }}"
     
     
     - name: Upload Windows Artifact arm64
