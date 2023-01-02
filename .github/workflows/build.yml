@@ -55,7 +55,7 @@ jobs:
       run: dotnet restore ${{ env.PROJECT_PATH }} 
     
     - name: Publish Maui WinUI project x64
-     shell: pwsh
+      shell: pwsh
       run: |
         dotnet publish ${{ env.PROJECT_PATH }}  -f net7.0-windows10.0.19041.0  -c Release -p:WindowsPackageType=None
         
