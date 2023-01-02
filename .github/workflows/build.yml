@@ -75,4 +75,4 @@ jobs:
       uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
       with:
           name: cosmosexplorer-win-arm64
-          path: CosmosExplorer/CosmosExplorer.Blazor/bin/Release/net7.0-windows10.0.19041.0/win10-arm64/AppPackages/*/*.msix
+          path: CosmosExplorer/CosmosExplorer.Blazor/bin/Release/net7.0-windows10.0.19041.0/win10-arm64/**/**/*.msix
