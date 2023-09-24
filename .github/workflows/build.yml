@@ -1,0 +1,78 @@
+name: Build Maui project
+
+on:
+  workflow_dispatch:
+ 
+env:
+  PROJECT_PATH: "CosmosExplorer.Blazor/CosmosExplorer.Blazor.csproj"
+  NUGETCONFIG_PATH: "nuget.config"
+  RELEASE_VERSION: ${{ github.ref_name }}
+  
+jobs:
+# ***************************** #
+# >>>>>>> Windows Build <<<<<<< #
+# ***************************** #
+  publish-windows:
+    runs-on: windows-2022
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET Core SDK
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '7.0.x'
+        include-prerelease: true
+
+    # For WinUI builds
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.1
+
+    - name: Generate version number using date and run number
+      shell: pwsh
+      id: version-creator
+      run: |
+        $buildDay = Get-Date -Format "yyyy.Mdd"
+        $ver = $buildDay + "." + $env:GITHUB_RUN_NUMBER + ".0"
+        echo "::set-output name=APP_VERSION::$ver"
+        
+    - name: Decrypt PFX file
+      run: |
+        echo "${{ secrets.WINDOWS_PFX_FILE }}" > cert.pfx.asc
+        certutil -decode cert.pfx.asc cert.pfx
+    - name: Add Cert to Store
+      run: |
+        certutil -user -q -p ${{ secrets.WINDOWS_PFX_PASSWORD }} -importpfx cert.pfx NoRoot
+        
+    - name: Install MAUI workloads (required for GitHub-hosted runners)
+      shell: pwsh
+      run: dotnet workload install maui --source https://api.nuget.org/v3/index.json
+
+    - name: Restore NuGet packages
+      shell: pwsh
+      run: dotnet restore ${{ env.PROJECT_PATH }} 
+    
+    - name: Publish Maui WinUI project x64
+      shell: pwsh
+      run: |
+        dotnet publish ${{ env.PROJECT_PATH }}  -f net7.0-windows10.0.19041.0  -c Release /p:RuntimeIdentifierOverride=win10-arm64 /p:PackageCertificateThumbprint="${{ secrets.WINDOWS_PFX_THUMBPRINT }}"
+        
+    - name: Upload Windows Artifact x64
+      uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
+      with:
+          name: cosmosexplorer-win-x64
+          path: D:\a\CosmosExplorer\CosmosExplorer\CosmosExplorer.Blazor\bin\Release\net7.0-windows10.0.19041.0\win10-x64\AppPackages\CosmosExplorer.Blazor_1.0.0.1_Test\CosmosExplorer.Blazor_1.0.0.1_x64.msix                         
+ 
+    - name: Publish Maui WinUI project arm64
+      shell: pwsh
+      run: |
+        dotnet publish ${{ env.PROJECT_PATH }} -f net7.0-windows10.0.19041.0 -c Release /p:RuntimeIdentifierOverride=win10-arm64 /p:PackageCertificateThumbprint="${{ secrets.WINDOWS_PFX_THUMBPRINT }}"
+    
+    
+    - name: Upload Windows Artifact arm64
+      uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
+      with:
+          name: cosmosexplorer-win-arm64
+          path: CosmosExplorer/CosmosExplorer.Blazor/bin/Release/net7.0-windows10.0.19041.0/win10-arm64/**/**/*.msix

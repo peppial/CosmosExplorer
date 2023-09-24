@@ -1,0 +1,61 @@
+﻿@page "/connectionstrings"
+@inject StateContainer stateContainer
+
+<p>
+    <input @bind="connectionStringName" placeholder="Name of the connection string" />
+</p>
+<p>
+    <textarea @bind="connectionString" placeholder="Cosmos connection string" cols="80" rows="5"></textarea>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Connection string</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in stateContainer.ConnectionStrings)
+        {
+            var style = "";
+            if (item.ConnectionString == stateContainer.ConnectionString) style = "background-color:#def0ff;";
+            <tr style="@style" @onclick="() => SelectConnectionString(item.ConnectionString)">
+                <td>@item.Name</td>
+                <td>@item.ConnectionString</td>
+
+                <td><a href="" @onclick="() => DeleteConnectionString(item.ConnectionString)">Delete</a></td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<button class="btn btn-primary" @onclick="Save">Save</button>
+@code {
+    private string connectionStringName { get; set; } = "";
+    private string connectionString { get; set; } = "";
+
+
+
+    private void Save()
+    {
+        stateContainer.ConnectionString = connectionString;
+        var strings = stateContainer.ConnectionStrings;
+        strings.Add(new PreferenceConnectionString { Name = connectionStringName, ConnectionString = connectionString, Selected = true });
+        stateContainer.ConnectionStrings = strings;
+        connectionStringName = "";
+        connectionString = "";
+    }
+
+    private void SelectConnectionString(string connectionString)
+    {
+        stateContainer.ConnectionString = connectionString;
+        stateContainer.Database = stateContainer.Container = "";
+    }
+    private void DeleteConnectionString(string connectionString)
+    {
+        var strings = stateContainer.ConnectionStrings;
+        strings.RemoveAll(item => item.ConnectionString == connectionString);
+        stateContainer.ConnectionStrings = strings;
+    }
+    }

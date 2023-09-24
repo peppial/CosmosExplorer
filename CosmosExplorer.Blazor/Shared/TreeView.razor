@@ -1,0 +1,86 @@
+﻿@typeparam TValue
+@inherits TreeViewBase<TValue>
+
+<ul class="parentUl">
+    @if (AllItems != null)
+    {
+        @foreach (var Pitem in AllItems)
+        {
+            if (GetPropertyValue(Pitem, ParentId) == "" || Convert.ToInt32(GetPropertyValue(Pitem, ParentId)) == 0)
+            {
+
+                if (Convert.ToBoolean(GetPropertyValue(Pitem, HasChildren)))
+                {
+                    <li>
+
+                        <span @onclick="@(()=>SpanToggle(Pitem))" class="@_caretcss[Convert.ToInt32(@GetPropertyValue(Pitem, Index))]">@GetPropertyValue(Pitem, Text)</span>
+
+                        <ul class="@_nestedcss[Convert.ToInt32(@GetPropertyValue(Pitem, Index))]">
+
+                            @foreach (var Citem in AllItems)
+                            {
+                                if (GetPropertyValue(Pitem, Index) == GetPropertyValue(Citem, ParentId))
+                                {
+                                    if (Convert.ToBoolean(GetPropertyValue(Citem, HasChildren)))
+                                    {
+
+                                        <li>
+                                            <span @onclick="@(()=>SpanToggle(Citem))" class="@_caretcss[Convert.ToInt32(@GetPropertyValue(Citem, Index))]">@GetPropertyValue(Citem, Text)</span>
+                                            <ul class="@_nestedcss[Convert.ToInt32(@GetPropertyValue(Citem, Index))]">
+                                                @foreach (var C1item in AllItems)
+                                                {
+                                                    if (GetPropertyValue(Citem, Index) == GetPropertyValue(C1item, ParentId))
+                                                    {
+                                                        if (Convert.ToBoolean(GetPropertyValue(C1item, HasChildren)))
+                                                        {
+                                                            <li>
+                                                                <span @onclick="@(()=>SpanToggle(C1item))" class="@_caretcss[Convert.ToInt32(@GetPropertyValue(C1item, Index))]">@GetPropertyValue(C1item, Text)</span>
+
+                                                                <ul class="@_nestedcss[Convert.ToInt32(@GetPropertyValue(C1item, Index))]">
+                                                                    @foreach (var C2item in AllItems)
+                                                                    {
+                                                                        if (GetPropertyValue(C1item, Index) == GetPropertyValue(C2item, ParentId))
+                                                                        {
+                                                                            if (Convert.ToBoolean(GetPropertyValue(C2item, HasChildren)))
+                                                                            {
+                                                                                <li>
+                                                                                    <span @onclick="@(()=>SpanToggle(C2item))" class="@_caretcss[Convert.ToInt32(@GetPropertyValue(C2item, Index))]">@GetPropertyValue(C1item, Text)</span>
+                                                                                </li>
+                                                                            }
+                                                                            
+                                                                        }
+                                                                            else
+                                                                            {
+                                                                                <li><span @onclick="@(()=> Invoke(C2item))"> @GetPropertyValue(C2item, Text)</span></li>
+                                                                            }
+                                                                    }
+                                                                </ul>
+                                                            </li>
+                                                        }
+                                                        else
+                                                        {
+                                                            <li @onclick="@(()=> Invoke(C1item))">@GetPropertyValue(C1item, Text)</li>
+                                                        }
+                                                    }
+                                                }
+                                            </ul>
+                                        </li>
+                                    }
+                                    else
+                                    {
+                                        <li class="@_caretcss[Convert.ToInt32(@GetPropertyValue(Citem, Index))]"  @onclick="@(()=> Invoke(Citem))">@GetPropertyValue(Citem, Text)</li>
+                                    }
+                                }
+                            }
+                        </ul>
+                    </li>
+                }
+                else
+                {
+                    <li @onclick="@(()=> Invoke(Pitem))">@GetPropertyValue(Pitem, Text)</li>
+                }
+            }
+
+        }
+    }
+</ul>
