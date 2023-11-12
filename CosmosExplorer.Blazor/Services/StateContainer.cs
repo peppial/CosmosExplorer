@@ -1,8 +1,7 @@
-﻿using System;
-using CosmosExplorer.Core;
+﻿using CosmosExplorer.Core;
 using CosmosExplorer.Core.Models;
 using Newtonsoft.Json;
-using Microsoft.Maui.Storage;
+
 namespace CosmosExplorer.Blazor.Services
 {
     public class StateContainer : IStateContainer

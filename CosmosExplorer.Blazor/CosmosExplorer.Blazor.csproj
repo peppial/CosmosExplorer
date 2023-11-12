@@ -38,10 +38,10 @@
     </PropertyGroup>
     <ItemGroup>
         <!-- App Icon -->
-        <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+        <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#c1c1c1" />
 
         <!-- Splash Screen -->
-        <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+        <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#c1c1c1" BaseSize="128,128" />
 
         <!-- Images -->
         <MauiImage Include="Resources\Images\*" />
@@ -65,12 +65,5 @@
       <ProjectReference Include="..\CosmosExplorer.Core\CosmosExplorer.Core.csproj" />
       <ProjectReference Include="..\CosmosExplorer.Domain\CosmosExplorer.Domain.csproj" />
       <ProjectReference Include="..\CosmosExplorer.Infrastructure\CosmosExplorer.Infrastructure.csproj" />
-    </ItemGroup>
- 
-    <ItemGroup>
-      <Content Remove="wwwroot\css\images\" />
-    </ItemGroup>
-    <ItemGroup>
-      <Folder Include="wwwroot\css\images\" />
     </ItemGroup>
 </Project>
