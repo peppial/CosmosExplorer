@@ -26,6 +26,7 @@ namespace CosmosExplorer.Blazor.Services
 		{
 			get
             {
+              //  return new();
                 return  JsonConvert.DeserializeObject<List<PreferenceConnectionString>>(Preferences.Default.Get<string>(ConnectionStringsName, "[]"));
             }
 			set { Preferences.Default.Set(ConnectionStringsName, JsonConvert.SerializeObject(value)); }

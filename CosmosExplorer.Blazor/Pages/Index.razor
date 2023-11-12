@@ -3,12 +3,27 @@
 @using CosmosExplorer.Core
 @inject IStateContainer stateContainer
 
-<p>
-    <input @bind="connectionStringName" placeholder="Name of the connection string" />
-</p>
-<p>
-    <textarea @bind="connectionString" placeholder="Cosmos connection string" cols="80" rows="5"></textarea>
-</p>
+
+<Modal @ref="modal">
+    <Title>Add a new CosmosDB Connection string</Title>
+    <Body>
+        <p>
+            <input @bind="connectionStringName" placeholder="Connection name" cols="" />
+        </p>
+        <p>
+            <textarea @bind="connectionString" placeholder="CosmosDb connection string" cols="80" rows="5"></textarea>
+        </p>
+
+    </Body>
+    <Footer>
+        <button type="button" class="btn btn-primary"  @onclick="() => Save()">Add new</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => modal.Close()">Close</button>
+    </Footer>
+</Modal>
+
+@code {
+    private Modal modal { get; set; }
+}
 
 <table class="table">
     <thead>
@@ -31,12 +46,22 @@
         }
     </tbody>
 </table>
+<button class="btn btn-primary" @onclick="() => modal.Open()">Add New</button>
 
-<button class="btn btn-primary" @onclick="Save">Save</button>
 @code {
     private string connectionStringName { get; set; } = "";
     private string connectionString { get; set; } = "";
+    private bool showNew = false;
 
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender && stateContainer.ConnectionStrings.Count==0)
+        {
+            showNew = true;
+            modal.Open();
+            StateHasChanged();
+        }
+    }
 
 
     private void Save()
@@ -47,6 +72,7 @@
         stateContainer.ConnectionStrings = strings;
         connectionStringName = "";
         connectionString = "";
+        modal.Close();
     }
 
     private void SelectConnectionString(string connectionString)
@@ -59,5 +85,6 @@
         var strings = stateContainer.ConnectionStrings;
         strings.RemoveAll(item => item.ConnectionString == connectionString);
         stateContainer.ConnectionStrings = strings;
+        SelectConnectionString("");
     }
-    }
+}

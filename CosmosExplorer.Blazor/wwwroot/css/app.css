@@ -152,6 +152,7 @@ ul, .parentUl {
     -moz-user-select: none; /* Firefox 2+ */
     -ms-user-select: none; /* IE 10+ */
     user-select: none;
+    font-size: large;
 }
 
     .caret::before {
@@ -172,15 +173,18 @@ ul, .parentUl {
 .nested {
     display: none;
     transition: all 0.45s;
+    font-size: large;
 }
 
 .active {
     cursor: pointer;
     display: block;
     transition: all 0.45s;
+    font-size: large;
 }
 .activeLink {
     background-color: #def0ff;
+    font-size: large;
 }
 
 #tree {

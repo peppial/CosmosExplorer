@@ -1,15 +1,15 @@
 ﻿@page "/"
 
 @using System.Linq
-@using CosmosExplorer.Blazor.Services
 @using CosmosExplorer.Core
 @using CosmosExplorer.Core.Models
-
+@using CosmosExplorer.Blazor.Shared
+@using Microsoft.AspNetCore.Components
+@using Microsoft.JSInterop
+@inject NavigationManager NavigationManager
 @inject ICosmosDBDocumentService CosmosDBDocumentService
 @inject IStateContainer stateContainer
 @inject IJSRuntime JsRuntime
-
-
 
 <div class="row">
     <div class="col-4">
@@ -62,7 +62,7 @@
             <button class="btn btn-primary" @onclick="QueryAsync">Query</button>
             <button class="btn btn-primary" @onclick="New">New</button>
             <span>&nbsp;</span><button class="btn btn-primary" @onclick="UpdateAsync">Save</button>
-            @if (selectedId!=null)
+            @if (selectedId != null)
             {
                 <span>&nbsp;</span><button class="btn btn-primary" @onclick="DeleteAsync">Delete</button>
             }
@@ -107,174 +107,191 @@
 
 @code {
     private const int initialCount = 100;
-    private int currentCount;
-    private IEnumerable<IDatabaseModel> databases;
-    private (string query, string connectionString, string database, string container) query;
-    private IEnumerable<(string, string)> result;
-    private int count;
-    private string documentString;
-    private string selectedId;
-    private string selectedPartitionKey;
-    private bool loading = false;
-    private string error;
-    private List<TreeItemData> TreeItems { get; set; } = new List<TreeItemData>();
-    private int? defaultItem;
+        private int currentCount;
+        private IEnumerable<IDatabaseModel> databases;
+        private (string query, string connectionString, string database, string container) query;
+        private IEnumerable<(string, string)> result;
+        private int count;
+        private string documentString;
+        private string selectedId;
+        private string selectedPartitionKey;
+        private bool loading = false;
+        private string error;
+        private List<TreeItemData> TreeItems { get; set; } = new List<TreeItemData>();
+        private int? defaultItem;
 
-    protected override async Task OnInitializedAsync()
-    {
-        loading = true;
-
-        databases = await CosmosDBDocumentService.GetDatabasesAsync();
-
-        foreach (var database in databases)
+        protected override async Task OnInitializedAsync()
         {
-            var item = new TreeItemData { Index = database.Index, Id = database.Id, Database = database.Id, Container = null, CanExpand = true, Expanded = true };
-            var ordered = database.Containers.OrderBy(c => c.Id).ToList();
-            TreeItems.Add(item);
-            foreach (var container in ordered)
+            if (stateContainer.ConnectionStrings.Count == 0)
             {
-                TreeItems.Add(new TreeItemData
+                NavigationManager.NavigateTo("connectionstrings");
+            }
+            error = null;
+            if (stateContainer.ConnectionString == "")
+            {
+                error = "Please add and select a connection string.";
+                return;
+            }
+            loading = true;
+            try
+            {
+
+                databases = await CosmosDBDocumentService.GetDatabasesAsync();
+
+                foreach (var database in databases)
                 {
-                    Index = container.Index,
-                    Id = container.Id,
-                    Database = database.Id,
-                    Container = container.Id,
-                    CanExpand = false,
-                    ParentId = database.Index
-                });
+                    var item = new TreeItemData { Index = database.Index, Id = database.Id, Database = database.Id, Container = null, CanExpand = true, Expanded = true };
+                    var ordered = database.Containers.OrderBy(c => c.Id).ToList();
+                    TreeItems.Add(item);
+                    foreach (var container in ordered)
+                    {
+                        TreeItems.Add(new TreeItemData
+                        {
+                            Index = container.Index,
+                            Id = container.Id,
+                            Database = database.Id,
+                            Container = container.Id,
+                            CanExpand = false,
+                            ParentId = database.Index
+                        });
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(stateContainer.Container))
+                {
+                    await SelectContainerAsync(stateContainer.Database, stateContainer.Container);
+                    defaultItem = databases.SelectMany(d => d.Containers).FirstOrDefault(c => c.Id == stateContainer.Container)?.Index;
+                }
+
+                if (stateContainer.LastQueries.Count > 0)
+                {
+                    query = stateContainer.LastQueries[0];
+                }
+            }
+            catch (Exception e)
+            {
+                error = e.Message;
+            }
+            loading = false;
+        }
+
+        private async Task QueryAsync((string query, string connectionString, string database, string container) item)
+        {
+            if (stateContainer.ConnectionString != item.connectionString || stateContainer.Container != item.container)
+                return;
+
+            documentString = null;
+            selectedId = null;
+            selectedPartitionKey = null;
+            this.query = item;
+            await QueryAsync();
+        }
+        private async Task UpdateAsync()
+        {
+            await CosmosDBDocumentService.UpdateDocumentAsync(selectedId, selectedPartitionKey, documentString);
+            await JsRuntime.InvokeAsync<string>("alert", "Document is updated.");
+
+        }
+        private void New()
+        {
+            documentString = "";
+            selectedId = null;
+        }
+        private async Task DeleteAsync()
+        {
+            bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
+            if (confirmed)
+            {
+                await CosmosDBDocumentService.DeleteDocumentAsync(selectedId, selectedPartitionKey);
+                await JsRuntime.InvokeAsync<string>("alert", "Document is deleted.");
+                await QueryAsync();
+            }
+        }
+        private async Task QueryAsync()
+        {
+            loading = true;
+            documentString = null;
+            error = null;
+            try
+            {
+                currentCount = initialCount;
+                (result, count) = await CosmosDBDocumentService.QueryAsync(query.query, currentCount);
+                query.connectionString = stateContainer.ConnectionString;
+                query.container = stateContainer.Container;
+                AddLastQuery(query);
+
+            }
+            catch (Exception e)
+            {
+                error = e.Message;
+            }
+
+            loading = false;
+        }
+
+        private async Task LoadMoreAsync()
+        {
+            loading = true;
+            error = null;
+            try
+            {
+                currentCount += initialCount;
+                (result, count) = await CosmosDBDocumentService.QueryAsync(query.query, currentCount);
+                AddLastQuery(query);
+            }
+            catch (Exception e)
+            {
+                error = e.Message;
+            }
+            loading = false;
+        }
+
+        private void AddLastQuery((string query, string connectionString, string database, string container) item)
+        {
+            var list = stateContainer.LastQueries;
+            if (list.Count > 0 && list[0] == item) return;
+            list.Insert(0, query);
+            if (list.Count > 10) list.RemoveAt(10);
+            stateContainer.LastQueries = list;
+        }
+
+        public async Task SelectDocumentAsync(string id, string partitionKey)
+        {
+            documentString = null;
+            selectedId = id;
+            selectedPartitionKey = partitionKey;
+            loading = true;
+            documentString = await CosmosDBDocumentService.GetDocumentAsync(id, partitionKey);
+
+            loading = false;
+        }
+
+        public async Task SelectContainerAsync(string database, string containerName)
+        {
+            if (containerName is null) return;
+
+            documentString = null;
+            result = null;
+
+            try
+            {
+                loading = true;
+                query = ("", stateContainer.ConnectionString, database, containerName);
+                await CosmosDBDocumentService.ChangeContainerAsync(database, containerName);
+                loading = false;
+            }
+            catch (Exception e)
+            {
+                error = e.Message;
             }
         }
 
-        if (!string.IsNullOrEmpty(stateContainer.Container))
+        private async Task SelectContainerAsync(int index)
         {
-            await SelectContainerAsync(stateContainer.Database, stateContainer.Container);
-            defaultItem = databases.SelectMany(d => d.Containers).FirstOrDefault(c => c.Id == stateContainer.Container)?.Index;
+            TreeItemData container = TreeItems.FirstOrDefault(i => i.Index == index);
+            TreeItemData database = TreeItems.FirstOrDefault(i => i.Index == container.ParentId);
+            await SelectContainerAsync(database.Id, container.Id);
         }
 
-        if (stateContainer.LastQueries.Count > 0)
-        {
-            query = stateContainer.LastQueries[0];
-        }
-        loading = false;
     }
-
-    private async Task QueryAsync((string query, string connectionString, string database, string container) item)
-    {
-        if (stateContainer.ConnectionString != item.connectionString || stateContainer.Container != item.container)
-            return;
-
-        documentString = null;
-        selectedId = null;
-        selectedPartitionKey = null;
-        this.query = item;
-        await QueryAsync();
-    }
-    private async Task UpdateAsync()
-    {
-        await CosmosDBDocumentService.UpdateDocumentAsync(selectedId, selectedPartitionKey, documentString);
-        await JsRuntime.InvokeAsync<string>("alert", "Document is updated.");
-
-    }
-    private void New()
-    {
-        documentString = "";
-        selectedId = null;
-    }
-    private async Task DeleteAsync()
-    {
-        bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
-        if (confirmed)
-        {
-            await CosmosDBDocumentService.DeleteDocumentAsync(selectedId, selectedPartitionKey);
-            await JsRuntime.InvokeAsync<string>("alert", "Document is deleted.");
-            await QueryAsync();
-        }
-    }
-    private async Task QueryAsync()
-    {
-        loading = true;
-        documentString = null;
-        error = null;
-        try
-        {
-            currentCount = initialCount;
-            (result, count) = await CosmosDBDocumentService.QueryAsync(query.query, currentCount);
-            query.connectionString = stateContainer.ConnectionString;
-            query.container = stateContainer.Container;
-            AddLastQuery(query);
-
-        }
-        catch (Exception e)
-        {
-            error = e.Message;
-        }
-
-        loading = false;
-    }
-
-    private async Task LoadMoreAsync()
-    {
-        loading = true;
-        error = null;
-        try
-        {
-            currentCount += initialCount;
-            (result, count) = await CosmosDBDocumentService.QueryAsync(query.query, currentCount);
-            AddLastQuery(query);
-        }
-        catch (Exception e)
-        {
-            error = e.Message;
-        }
-        loading = false;
-    }
-
-    private void AddLastQuery((string query, string connectionString, string database, string container) item)
-    {
-        var list = stateContainer.LastQueries;
-        if (list.Count > 0 && list[0] == item) return;
-        list.Insert(0, query);
-        if (list.Count > 10) list.RemoveAt(10);
-        stateContainer.LastQueries = list;
-    }
-
-    public async Task SelectDocumentAsync(string id, string partitionKey)
-    {
-        documentString = null;
-        selectedId = id;
-        selectedPartitionKey = partitionKey;
-        loading = true;
-        documentString = await CosmosDBDocumentService.GetDocumentAsync(id, partitionKey);
-
-        loading = false;
-    }
-
-    public async Task SelectContainerAsync(string database, string containerName)
-    {
-        if (containerName is null) return;
-
-        documentString = null;
-        result = null;
-
-        try
-        {
-            loading = true;
-            query = ("", stateContainer.ConnectionString, database, containerName);
-            await CosmosDBDocumentService.ChangeContainerAsync(database, containerName);
-            loading = false;
-        }
-        catch (Exception e)
-        {
-            error = e.Message;
-        }
-    }
-
-    private async Task SelectContainerAsync(int index)
-    {
-        TreeItemData container = TreeItems.FirstOrDefault(i => i.Index == index);
-        TreeItemData database = TreeItems.FirstOrDefault(i => i.Index == container.ParentId);
-        await SelectContainerAsync(database.Id, container.Id);
-    }
-
-}
 
