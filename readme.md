@@ -1,7 +1,7 @@
 
 <h4>CosmosDB Explorer</h4>
 
-A client explorer for Microsoft CosmosDB for desktop(Windows, MacOs) and Mobile (Android,iOS).
+A client explorer for Azure Microsoft CosmosDB for desktop(Windows, MacOs) and Mobile (Android,iOS).
 
 <h4>Features</h4>
 
