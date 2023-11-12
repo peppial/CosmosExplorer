@@ -1,10 +1,12 @@
 ﻿using System;
+using CosmosExplorer.Core;
+using CosmosExplorer.Core.Models;
 using Newtonsoft.Json;
 using Microsoft.Maui.Storage;
 namespace CosmosExplorer.Blazor.Services
 {
-	public class StateContainer
-	{
+    public class StateContainer : IStateContainer
+    {
 
         private const string ConnectionStringName = "ConnectionString";
         
@@ -54,13 +56,5 @@ namespace CosmosExplorer.Blazor.Services
         }
     }
 
-    public record PreferenceConnectionString
-    {
-        public string Name { get; set; }
-
-        public string ConnectionString { get; set; }
-
-        public bool Selected { get; set; }
-    }
 }
 

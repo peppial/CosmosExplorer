@@ -17,7 +17,6 @@
   <ItemGroup>
     <Folder Include="Connection\" />
     <Folder Include="Query\" />
-    <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.31.2" />

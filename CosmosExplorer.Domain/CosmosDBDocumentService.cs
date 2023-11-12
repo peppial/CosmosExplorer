@@ -3,21 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CosmosExplorer.Core;
 using CosmosExplorer.Core.Command;
 using CosmosExplorer.Core.Query;
 using CosmosExplorer.Core.Connection;
 using CosmosExplorer.Core.Models;
 
-namespace CosmosExplorer.Blazor.Services;
+namespace CosmosExplorer.Domain;
 
-public class CosmosDBDocumentService
+public class CosmosDBDocumentService : ICosmosDBDocumentService
 {
     private readonly IConnectionService connectionService;
     private readonly IQueryService queryService;
     private readonly ICommandService commandService;
-    private readonly StateContainer stateContainer;
+    private readonly IStateContainer stateContainer;
 
-    public CosmosDBDocumentService(StateContainer stateContainer, IConnectionService connectionService,
+    public CosmosDBDocumentService(IStateContainer stateContainer, IConnectionService connectionService,
         IQueryService queryService, ICommandService commandService)
     {
         this.connectionService = connectionService ?? throw new ArgumentNullException(nameof(connectionService));

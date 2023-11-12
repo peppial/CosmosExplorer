@@ -1,5 +1,7 @@
 ﻿@page "/connectionstrings"
-@inject StateContainer stateContainer
+@using CosmosExplorer.Core.Models
+@using CosmosExplorer.Core
+@inject IStateContainer stateContainer
 
 <p>
     <input @bind="connectionStringName" placeholder="Name of the connection string" />

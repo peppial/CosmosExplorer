@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CosmosExplorer.Blazor", "Co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CosmosExplorer.Infrastructure", "CosmosExplorer.Infrastructure\CosmosExplorer.Infrastructure.csproj", "{3A98F476-FEB5-45AC-886F-C4E69EEF461F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CosmosExplorer.Maui", "CosmosExplorer.Maui\CosmosExplorer.Maui.csproj", "{9A360876-74AB-4E65-AFD9-FE4E51164DCD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CosmosExplorer.Domain", "CosmosExplorer.Domain\CosmosExplorer.Domain.csproj", "{5C30FD97-5F25-47C7-8F53-1FE4E2C51475}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,10 +37,10 @@ Global
 		{3A98F476-FEB5-45AC-886F-C4E69EEF461F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3A98F476-FEB5-45AC-886F-C4E69EEF461F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3A98F476-FEB5-45AC-886F-C4E69EEF461F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9A360876-74AB-4E65-AFD9-FE4E51164DCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9A360876-74AB-4E65-AFD9-FE4E51164DCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9A360876-74AB-4E65-AFD9-FE4E51164DCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9A360876-74AB-4E65-AFD9-FE4E51164DCD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C30FD97-5F25-47C7-8F53-1FE4E2C51475}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C30FD97-5F25-47C7-8F53-1FE4E2C51475}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C30FD97-5F25-47C7-8F53-1FE4E2C51475}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C30FD97-5F25-47C7-8F53-1FE4E2C51475}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

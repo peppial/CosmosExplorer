@@ -2,10 +2,11 @@
 
 @using System.Linq
 @using CosmosExplorer.Blazor.Services
+@using CosmosExplorer.Core
 @using CosmosExplorer.Core.Models
 
-@inject CosmosDBDocumentService CosmosDBDocumentService
-@inject StateContainer stateContainer
+@inject ICosmosDBDocumentService CosmosDBDocumentService
+@inject IStateContainer stateContainer
 @inject IJSRuntime JsRuntime
 
 
@@ -192,6 +193,7 @@
     private async Task QueryAsync()
     {
         loading = true;
+        documentString = null;
         error = null;
         try
         {

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using CosmosExplorer.Blazor.Services;
+using CosmosExplorer.Core;
 using CosmosExplorer.Core.Connection;
 using CosmosExplorer.Core.Query;
 using DotNet.Meteor.HotReload.Plugin;
@@ -7,10 +8,8 @@ using CosmosExplorer.Infrastructure.Query;
 using CosmosExplorer.Core.Models;
 using CosmosExplorer.Infrastructure.Connection;
 using CosmosExplorer.Core.Command;
+using CosmosExplorer.Domain;
 using CosmosExplorer.Infrastructure.Command;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Maui.Controls.Hosting;
-using Microsoft.Maui.Hosting;
 
 namespace CosmosExplorer.Blazor;
 
@@ -34,10 +33,8 @@ public static class MauiProgram
 		builder.EnableHotReload();
 #endif
 
-        builder.Services.AddSingleton<CosmosDBDocumentService>();
-
-        builder.Services.AddSingleton<StateContainer>();
-
+        builder.Services.AddSingleton<ICosmosDBDocumentService, CosmosDBDocumentService>();
+        builder.Services.AddSingleton<IStateContainer, StateContainer>();
         builder.Services.AddSingleton<IContainerModel, CosmosDbContainerModel>();
         builder.Services.AddSingleton<IDatabaseModel, CosmosDbDatabaseModel>();
         builder.Services.AddSingleton<IConnectionService,CosmosDbConnectionService>();
