@@ -1,8 +1,8 @@
-using CosmosExplorer.Domain.Connection;
+using CosmosExplorer.Core.Connection;
 using Microsoft.Azure.Cosmos;
 using CosmosExplorer.Infrastructure.Extensions;
-using CosmosExplorer.Domain.Models;
-using CosmosExplorer.Domain.Command;
+using CosmosExplorer.Core.Models;
+using CosmosExplorer.Core.Command;
 using Microsoft.Azure.Documents.Client;
 using static System.Net.Mime.MediaTypeNames;
 using Newtonsoft.Json;

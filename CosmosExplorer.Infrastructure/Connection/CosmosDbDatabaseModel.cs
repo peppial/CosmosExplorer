@@ -1,5 +1,5 @@
 ﻿using System;
-using CosmosExplorer.Domain.Models;
+using CosmosExplorer.Core.Models;
 using CosmosExplorer.Infrastructure.Connection;
 using System.Linq;
 

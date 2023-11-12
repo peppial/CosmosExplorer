@@ -1,8 +1,8 @@
-﻿using CosmosExplorer.Domain.Connection;
+﻿using CosmosExplorer.Core.Connection;
 using Microsoft.Azure.Cosmos;
-using CosmosExplorer.Domain.Models;
+using CosmosExplorer.Core.Models;
 using CosmosExplorer.Infrastructure.Extensions;
-using CosmosExplorer.Domain.Query;
+using CosmosExplorer.Core.Query;
 
 namespace CosmosExplorer.Infrastructure.Query
 {

@@ -1,7 +1,7 @@
 ﻿using System;
-using CosmosExplorer.Domain.Models;
+using CosmosExplorer.Core.Models;
 
-namespace CosmosExplorer.Domain.Query
+namespace CosmosExplorer.Core.Query
 {
 	public interface IQueryService
 	{

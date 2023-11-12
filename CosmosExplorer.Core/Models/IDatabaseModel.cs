@@ -1,4 +1,4 @@
-﻿namespace CosmosExplorer.Domain.Models
+﻿namespace CosmosExplorer.Core.Models
 {
     public interface IDatabaseModel
     {

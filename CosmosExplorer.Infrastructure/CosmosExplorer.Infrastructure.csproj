@@ -19,6 +19,6 @@
     <Folder Include="Extensions\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CosmosExplorer.Domain\CosmosExplorer.Domain.csproj" />
+    <ProjectReference Include="..\CosmosExplorer.Core\CosmosExplorer.Core.csproj" />
   </ItemGroup>
 </Project>

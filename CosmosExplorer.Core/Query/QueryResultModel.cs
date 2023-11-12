@@ -1,7 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json.Linq;
 
-namespace CosmosExplorer.Domain.Query
+namespace CosmosExplorer.Core.Query
 {
 	public record QueryResultModel<T>
 	{

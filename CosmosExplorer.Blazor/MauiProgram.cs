@@ -1,13 +1,16 @@
 ﻿using Microsoft.Extensions.Logging;
 using CosmosExplorer.Blazor.Services;
-using CosmosExplorer.Domain.Connection;
-using CosmosExplorer.Domain.Query;
+using CosmosExplorer.Core.Connection;
+using CosmosExplorer.Core.Query;
 using DotNet.Meteor.HotReload.Plugin;
 using CosmosExplorer.Infrastructure.Query;
-using CosmosExplorer.Domain.Models;
+using CosmosExplorer.Core.Models;
 using CosmosExplorer.Infrastructure.Connection;
-using CosmosExplorer.Domain.Command;
+using CosmosExplorer.Core.Command;
 using CosmosExplorer.Infrastructure.Command;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Maui.Controls.Hosting;
+using Microsoft.Maui.Hosting;
 
 namespace CosmosExplorer.Blazor;
 

@@ -62,7 +62,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\CosmosExplorer.Domain\CosmosExplorer.Domain.csproj" />
+      <ProjectReference Include="..\CosmosExplorer.Core\CosmosExplorer.Core.csproj" />
       <ProjectReference Include="..\CosmosExplorer.Infrastructure\CosmosExplorer.Infrastructure.csproj" />
     </ItemGroup>
  

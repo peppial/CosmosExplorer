@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Azure.Cosmos;
 
-namespace CosmosExplorer.Domain.Models
+namespace CosmosExplorer.Core.Models
 {
     public interface IContainerModel
     {

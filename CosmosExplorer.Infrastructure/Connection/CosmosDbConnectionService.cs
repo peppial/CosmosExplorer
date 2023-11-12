@@ -1,5 +1,5 @@
-﻿using CosmosExplorer.Domain.Connection;
-using CosmosExplorer.Domain.Models;
+﻿using CosmosExplorer.Core.Connection;
+using CosmosExplorer.Core.Models;
 using Microsoft.Azure.Cosmos;
 
 namespace CosmosExplorer.Infrastructure.Connection;
@@ -14,7 +14,7 @@ public class CosmosDbConnectionService : IConnectionService, IDisposable
     public Container? container { get; private set; }
     private string? connectionString { get; set; }
 
-    public async Task<string> ChangeContainerAsync(string connectionString, string databaseName, string containerName)
+    public async Task<string?> ChangeContainerAsync(string connectionString, string databaseName, string containerName)
     {
         cosmosClient = new CosmosClient(connectionString);
         this.connectionString = connectionString;

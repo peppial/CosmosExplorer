@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Reflection.Metadata;
 
-namespace CosmosExplorer.Domain.Models
+namespace CosmosExplorer.Core.Models
 {
     public interface IDocumentModel
     {

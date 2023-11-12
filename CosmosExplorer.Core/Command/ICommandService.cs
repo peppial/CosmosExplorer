@@ -1,6 +1,6 @@
-using CosmosExplorer.Domain.Models;
+using CosmosExplorer.Core.Models;
 
-namespace CosmosExplorer.Domain.Command
+namespace CosmosExplorer.Core.Command
 {
 	public interface ICommandService
 	{
