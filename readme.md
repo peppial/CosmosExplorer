@@ -5,9 +5,8 @@ A client explorer for Azure Microsoft CosmosDB for desktop(Windows, MacOs) and M
 
 <h4>Features</h4>
 
-CRUD for every Cosmos DB resource\
-Execute SQL Query on a Collection\
-JSON Editor for documents
+Execute SQL Query on a collection\
+CRUD for every Cosmos DB resource using a JSON Editor for documents
 
 <h4>Installation</h4>
 
