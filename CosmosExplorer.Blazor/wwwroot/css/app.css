@@ -156,10 +156,9 @@ ul, .parentUl {
 }
 
     .caret::before {
-        content: url('images/Triangle-right.svg');
+        content: url('images/Triangle-right.svg') ;
         color: black;
         display: inline-block;
-        margin-right: 6px;
         transition: all 0.45s;
     }
 
@@ -219,4 +218,12 @@ ul, .parentUl {
     border: solid 1px;
     margin-top: 5px;
 }
-/*css end*/
+
+.largeFont{
+    font-size: large;
+}
+
+.paddingLeft
+{
+    
+}

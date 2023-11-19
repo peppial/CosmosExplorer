@@ -1,23 +1,26 @@
 ﻿@page "/connectionstrings"
 @using CosmosExplorer.Core.Models
 @using CosmosExplorer.Core
+@inject NavigationManager NavigationManager
 @inject IStateContainer stateContainer
-
+@inject IJSRuntime JsRuntime
 
 <Modal @ref="modal">
     <Title>Add a new CosmosDB Connection string</Title>
     <Body>
         <p>
-            <input @bind="connectionStringName" placeholder="Connection name" cols="" />
+            <input @bind="connectionStringName" placeholder="Connection name" cols="" @ref="connectionStringNameRef" />
         </p>
         <p>
-            <textarea @bind="connectionString" placeholder="CosmosDb connection string" cols="80" rows="5"></textarea>
+            <textarea @bind="connectionString" placeholder="CosmosDb connection string" @ref="connectionStringRef" cols="80" rows="5"></textarea>
         </p>
 
     </Body>
     <Footer>
-        <button type="button" class="btn btn-primary"  @onclick="() => Save()">Add new</button>
+        <div class="error">@error </div><br/>
+        <button type="button" class="btn btn-primary" @onclick="() => SaveAsync()">Add new</button>
         <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => modal.Close()">Close</button>
+
     </Footer>
 </Modal>
 
@@ -30,6 +33,8 @@
         <tr>
             <th>Name</th>
             <th>Connection string</th>
+            <th></th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -37,11 +42,11 @@
         {
             var style = "";
             if (item.ConnectionString == stateContainer.ConnectionString) style = "background-color:#def0ff;";
-            <tr style="@style" @onclick="() => SelectConnectionString(item.ConnectionString)">
+            <tr style="@style">
                 <td>@item.Name</td>
                 <td>@item.ConnectionString</td>
-
-                <td><a href="" @onclick="() => DeleteConnectionString(item.ConnectionString)">Delete</a></td>
+                <td><a href="" @onclick="() => SelectConnectionString(item.ConnectionString)">Select</a></td>
+                <td><a href="" @onclick="() => DeleteConnectionStringAsync(item.Name, item.ConnectionString)">Delete</a></td>
             </tr>
         }
     </tbody>
@@ -49,30 +54,52 @@
 <button class="btn btn-primary" @onclick="() => modal.Open()">Add New</button>
 
 @code {
-    private string connectionStringName { get; set; } = "";
-    private string connectionString { get; set; } = "";
-    private bool showNew = false;
+    private string connectionStringName = "";
+    private string connectionString = "";
+    private string error = "";
+    private ElementReference connectionStringNameRef;
+    private ElementReference connectionStringRef;
+
 
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender && stateContainer.ConnectionStrings.Count==0)
         {
-            showNew = true;
             modal.Open();
             StateHasChanged();
         }
     }
 
 
-    private void Save()
+    private async Task SaveAsync()
     {
+        error = "";
+        if(string.IsNullOrEmpty(connectionStringName))
+        {
+            error = "Please enter connection string name.";
+            await connectionStringNameRef.FocusAsync();
+            return;
+        }
+        if(string.IsNullOrEmpty(connectionString))
+        {
+            error = "Please enter connection string.";
+            await connectionStringRef.FocusAsync();
+            return;
+        }
+        if(stateContainer.ConnectionStrings.Any(c=>c.ConnectionString==connectionString))
+        {
+            error = "Connection string already exists.";
+            await connectionStringRef.FocusAsync();
+            return;
+        }
+        
         stateContainer.ConnectionString = connectionString;
         var strings = stateContainer.ConnectionStrings;
         strings.Add(new PreferenceConnectionString { Name = connectionStringName, ConnectionString = connectionString, Selected = true });
         stateContainer.ConnectionStrings = strings;
-        connectionStringName = "";
-        connectionString = "";
+        SelectConnectionString(connectionString);
         modal.Close();
+        connectionStringName = connectionString = "";
     }
 
     private void SelectConnectionString(string connectionString)
@@ -80,11 +107,20 @@
         stateContainer.ConnectionString = connectionString;
         stateContainer.Database = stateContainer.Container = "";
     }
-    private void DeleteConnectionString(string connectionString)
+    private async Task DeleteConnectionStringAsync(string name, string connectionString)
     {
+        bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
+        if (!confirmed) return;
+        
         var strings = stateContainer.ConnectionStrings;
-        strings.RemoveAll(item => item.ConnectionString == connectionString);
+        strings.RemoveAll(item => item.Name==name && item.ConnectionString == connectionString );
         stateContainer.ConnectionStrings = strings;
-        SelectConnectionString("");
+        if (strings.Count == 0)
+        {
+            modal.Open();
+            return;
+        }
+        SelectConnectionString(strings[0].ConnectionString);
+        NavigationManager.NavigateTo("connectionstrings");
     }
 }

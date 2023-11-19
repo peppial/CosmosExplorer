@@ -52,7 +52,7 @@ public partial class TreeViewBase<TValue> : ComponentBase
         {
             _caretcss[DefaultItem.Value] = "activeLink";
             _caretcss[1] = _caretDown[1] ? "caret caret-down" : "caret";
-            _nestedcss[1] = _caretDown[1] ? "active" : "nested";
+            _nestedcss[1] = _caretDown[1] ? "actives" : "nested";
         }
 
         return base.OnInitializedAsync();
@@ -94,7 +94,7 @@ public partial class TreeViewBase<TValue> : ComponentBase
     {
         var _clckdItemid = Convert.ToInt32(GetPropertyValue(item, Index));
 
-        _caretcss[_clckdItemid] = _caretDown[_clckdItemid] ? "caret caret-down" : "caret";
+        _caretcss[_clckdItemid] = _caretDown[_clckdItemid] ? "caret caret-down paddingLeft" : "caret paddingLeft";
         _nestedcss[_clckdItemid] = _caretDown[_clckdItemid] ? "active" : "nested";
         
     }
@@ -106,7 +106,10 @@ public partial class TreeViewBase<TValue> : ComponentBase
         foreach (var it in AllItems)
         {
             var clckdItemid = Convert.ToInt32(GetPropertyValue(it, Index));
-            _caretcss[clckdItemid] = "";
+            if (_caretcss[clckdItemid].IndexOf("caret") == -1)
+            {
+                _caretcss[clckdItemid] = "";
+            }
 
         }
         _caretcss[_clckdItemid] = "activeLink";
