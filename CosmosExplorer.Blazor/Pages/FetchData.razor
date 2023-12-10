@@ -57,7 +57,7 @@
     <div class="col-5">
         @if (!string.IsNullOrEmpty(stateContainer.Container))
         {
-            <textarea  placeholder="SELECT * FROM c" cols="80" rows="5" class="largeFont"></textarea>
+            <textarea  @bind="query.query"  placeholder="SELECT * FROM c" cols="80" rows="5" class="largeFont"></textarea>
             <p></p>
             <button class="btn btn-primary" @onclick="QueryAsync">Query</button>
             <button class="btn btn-primary" @onclick="New">New</button>
@@ -76,7 +76,7 @@
             @if (documentString != null)
             {
 
-                <textarea class="document" cols="80" rows="40"></textarea>
+                <textarea  @bind="documentString" class="document" cols="80" rows="40"></textarea>
 
             }
 
