@@ -179,13 +179,14 @@ ul, .parentUl {
     cursor: pointer;
     display: block;
     transition: all 0.45s;
-    font-size: large;
 }
 .activeLink {
     background-color: #def0ff;
     font-size: large;
 }
-
+.documentLink {
+    background-color: #def0ff;
+}
 #tree {
     height: 30vh;
     overflow: auto;
@@ -221,9 +222,4 @@ ul, .parentUl {
 
 .largeFont{
     font-size: large;
-}
-
-.paddingLeft
-{
-    
 }

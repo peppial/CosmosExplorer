@@ -42,7 +42,7 @@
                             @foreach (var (id, partitionKey) in result)
                             {
                                 var style = "";
-                                if (id == selectedId && partitionKey == selectedPartitionKey) style = "activeLink";
+                                if (id == selectedId && partitionKey == selectedPartitionKey) style = "documentLink";
                                 <tr class="@style" @onclick="() => SelectDocumentAsync(id, partitionKey)">
                                     <td>@id</td>
                                     <td>@partitionKey</td>
@@ -57,7 +57,7 @@
     <div class="col-5">
         @if (!string.IsNullOrEmpty(stateContainer.Container))
         {
-            <textarea @bind="query.query" placeholder="SELECT * FROM c" cols="80" rows="5"></textarea>
+            <textarea  placeholder="SELECT * FROM c" cols="80" rows="5" class="largeFont"></textarea>
             <p></p>
             <button class="btn btn-primary" @onclick="QueryAsync">Query</button>
             <button class="btn btn-primary" @onclick="New">New</button>
@@ -76,7 +76,7 @@
             @if (documentString != null)
             {
 
-                <textarea @bind="documentString" class="document" cols="80" rows="40"></textarea>
+                <textarea class="document" cols="80" rows="40"></textarea>
 
             }
 
@@ -286,11 +286,11 @@
             }
         }
 
-        private async Task SelectContainerAsync(int index)
+        private Task SelectContainerAsync(int index)
         {
             TreeItemData container = TreeItems.FirstOrDefault(i => i.Index == index);
             TreeItemData database = TreeItems.FirstOrDefault(i => i.Index == container.ParentId);
-            await SelectContainerAsync(database.Id, container.Id);
+            return SelectContainerAsync(database.Id, container.Id);
         }
 
     }
