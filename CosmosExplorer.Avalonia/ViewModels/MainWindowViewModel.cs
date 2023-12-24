@@ -1,150 +1,146 @@
-﻿using System;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
+﻿using ReactiveUI;
+using System;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using CosmosExplorer.Avalonia.Services;
+using System.Windows.Input;
+using CosmosExplorer.Core;
 using CosmosExplorer.Core.State;
-using ReactiveUI;
+using DynamicData;
 
-namespace CosmosExplorer.Avalonia.ViewModels;
-
-public partial class MainWindowViewModel : ObservableObject
+namespace CosmosExplorer.Avalonia.ViewModels
 {
-    private readonly IUserSettingsService _userSettingsService;
-
-    public MainWindowViewModel(IUserSettingsService userSettingsService)
-    {
-        _userSettingsService = userSettingsService;
-    }
-    
-    public string Greeting => "Welcome to Avalonia!";
-
-    // Add our SimpleViewModel.
-    // Note: We need at least a get-accessor for our Properties.
-    public SimpleViewModel SimpleViewModel { get; } = new SimpleViewModel();
-
-
-    // Add our ReactiveViewModel
-    public ReactiveViewModel ReactiveViewModel { get; } = new ReactiveViewModel(new FileSystemUserSettingsService());
-
-  
-}
-
-
-
-    // Instead of implementing "INotifyPropertyChanged" on our own we use "ReactiveObject" as 
-    // our base class. Read more about it here: https://www.reactiveui.net
-    public partial class ReactiveViewModel : ObservableObject
+    public class MainWindowViewModel : ViewModelBase
     {
         private readonly IUserSettingsService userSettingsService;
+        private readonly ICosmosDBDocumentService cosmosDbDocumentService;
+        private readonly IStateContainer stateContainer;
+        public ICommand LoadSettingsAsyncCommand { get; }
+        public ICommand SaveSettingsAsyncCommand { get; }
+        public ICommand QueryAsyncCommand { get; }
+        public ICommand GetDocumentAsyncCommand { get; }
 
-        public ReactiveViewModel(IUserSettingsService userSettingsService)
+        public ObservableCollection<string> FullDocuments { get; } = new ObservableCollection<string>();
+       
+        private string? connectionString;
+        public string? ConnectionString
         {
-            this.userSettingsService = userSettingsService;
-            // We can listen to any property changes with "WhenAnyValue" and do whatever we want in "Subscribe".
-            //this.WhenAnyValue(o => o.Name)
-            //    .Subscribe(o => this.RaisePropertyChanged(nameof(Greeting)));
+            get => connectionString;
+            set => this.RaiseAndSetIfChanged(ref connectionString, value);
         }
-
-        private string? connectionString; // This is our backing field for Name
         
-        public async Task SaveAsync(string parameter)
+        private string? query;
+        public string? Query
         {
-            var userSettings = await userSettingsService.GetSettingsAsync();
-            userSettings.ConnectionString = connectionString;
-            await userSettingsService.SaveSettingsAsync(userSettings);
+            get => query;
+            set => this.RaiseAndSetIfChanged(ref query, value);
         }
-        public string? Name
+        
+        public ObservableCollection<(string, string)> Documents { get; } = new ObservableCollection<(string, string)>();
+
+        private (string,string) selectedDocument;
+        public (string,string) SelectedDocument
         {
-            get
-            {
-                return connectionString;
-            }
+            get { return selectedDocument; }
             set
             {
-
-                connectionString = value;
+                if (selectedDocument == value)
+                    return;
+                selectedDocument = value;
+                
+                GetDocumentAsyncCommand.Execute(null);
             }
         }
+        
+        public ObservableCollection<(string database, string container)> Databases { get; } = new ObservableCollection<(string, string)>();
 
-        // Greeting will change based on a Name.
-        public string Greeting
+        private (string database, string container) selectedDatabase;
+        public (string database, string container) SelectedDatabase
         {
-            get
-            {
-                if (string.IsNullOrEmpty(Name))
-                {
-                    // If no Name is provided, use a default Greeting
-                    return "Hello World from Avalonia.Samples";
-                }
-                else
-                {
-                    // else Greet the User.
-                    return $"Hello {Name}";
-                }
-            }
-        }
-    }
-
-
-
-    // This is our simple ViewModel. We need to implement the interface "INotifyPropertyChanged"
-    // in order to notify the View if any of our properties changed.
-    public class SimpleViewModel : INotifyPropertyChanged
-    {
-        // This event is implemented by "INotifyPropertyChanged" and is all we need to inform 
-        // our View about changes.
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        // For convenience we add a method which will raise the above event.
-        private void RaisePropertyChanged([CallerMemberName] string? propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        // ---- Add some Properties ----
-
-        private string? _Name; // This is our backing field for Name
-
-        public string? Name
-        {
-            get { return _Name; }
+            get { return selectedDatabase; }
             set
             {
-                // We only want to update the UI if the Name actually changed, so we check if the value is actually new
-                if (_Name != value)
+                if (selectedDatabase == value)
+                    return;
+                selectedDatabase = value;
+                
+                GetDocumentAsyncCommand.Execute(null);
+
+            }
+        }
+        public MainWindowViewModel(IUserSettingsService userSettingsService, ICosmosDBDocumentService cosmosDbDocumentService,IStateContainer stateContainer )
+        {
+            this.userSettingsService = userSettingsService ?? throw new ArgumentNullException(nameof(userSettingsService));
+            this.cosmosDbDocumentService = cosmosDbDocumentService ?? throw new ArgumentNullException(nameof(cosmosDbDocumentService));
+            this.stateContainer = stateContainer ?? throw new ArgumentNullException(nameof(stateContainer));
+            
+             // see: https://www.reactiveui.net/docs/handbook/commands/
+             
+            // Init OpenThePodBayDoorsFellowRobotCommand
+            // The IObservable<bool> is needed to enable or disable the command depending on valid parameters
+            // The Observable listens to RobotName and will enable the Command if the name is not empty.
+            //IObservable<bool> canExecuteFellowRobotCommand =
+            //    this.WhenAnyValue(vm => vm.ConnectionString, (name) => !string.IsNullOrEmpty(name));
+
+            //OpenThePodBayDoorsFellowRobotCommand = 
+            //    ReactiveCommand.Create<string?>(name => OpenThePodBayDoorsFellowRobot(name), canExecuteFellowRobotCommand);
+
+            LoadSettingsAsyncCommand = ReactiveCommand.CreateFromTask(LoadSettingsAsync);
+            SaveSettingsAsyncCommand = ReactiveCommand.CreateFromTask(SaveSettingsAsync);
+            QueryAsyncCommand = ReactiveCommand.CreateFromTask(QueryAsync); 
+            GetDocumentAsyncCommand = ReactiveCommand.CreateFromTask(GetDocumentAsync); 
+
+            LoadSettingsAsyncCommand.Execute(null);
+            
+        } 
+        private async Task LoadSettingsAsync()
+        {
+            var connectionString = await userSettingsService.GetSettingsAsync();
+            ConnectionString = connectionString.ConnectionString;
+            stateContainer.ConnectionString = connectionString.ConnectionString;
+            var databases = await cosmosDbDocumentService.GetDatabasesAsync();
+            
+            Databases.Clear();
+            foreach (var database in databases)
+            {
+                foreach (var container in database.Containers)
                 {
-                    // 1. update our backing field
-                    _Name = value;
-
-                    // 2. We call RaisePropertyChanged() to notify the UI about changes. 
-                    // We can omit the property name here because [CallerMemberName] will provide it for us.  
-                    RaisePropertyChanged();
-
-                    // 3. Greeting also changed. So let's notify the UI about it. 
-                    RaisePropertyChanged(nameof(Greeting));
+                    Databases.Add((database.Id, container.Id));
                 }
+            }
+
+            SelectedDatabase = Databases[0];
+        }
+        private async Task SaveSettingsAsync()
+        {
+           var settings = await userSettingsService.GetSettingsAsync();
+           settings.ConnectionString = ConnectionString;
+           await userSettingsService.SaveSettingsAsync(settings);
+        }
+        
+        private async Task QueryAsync()
+        {
+            try
+            {
+                await cosmosDbDocumentService.ChangeContainerAsync(selectedDatabase.database, selectedDatabase.container);
+                
+                (var result, int count) = (await cosmosDbDocumentService.QueryAsync(query, 100));
+
+                Documents.Clear();
+                Documents.AddRange(result.ToArray());
+
+            }
+            catch (Exception e)
+            {
+                
             }
         }
 
-
-        // Greeting will change based on a Name.
-        public string Greeting
+        private async Task GetDocumentAsync()
         {
-            get
-            {
-                if (string.IsNullOrEmpty(Name))
-                {
-                    // If no Name is provided, use a default Greeting
-                    return "Hello World from Avalonia.Samples";
-                }
-                else
-                {
-                    // else Greet the User.
-                    return $"Hello {Name}";
-                }
-            }
+            var doc = await cosmosDbDocumentService.GetDocumentAsync(selectedDocument.Item1,selectedDocument.Item2);
+            FullDocuments.Clear();
+            FullDocuments.Add(doc);
         }
     }
+}

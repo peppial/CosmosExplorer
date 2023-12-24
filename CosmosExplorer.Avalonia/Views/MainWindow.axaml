@@ -8,36 +8,80 @@
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="CosmosExplorer.Avalonia">
-
     <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:MainWindowViewModel/>
+        <vm:MainWindowViewModel />
     </Design.DataContext>
-    <TabControl>
-        <!-- Our Simple ViewModel -->
-        <TabItem Header="Simple ViewModel" >
-            <StackPanel DataContext="{Binding SimpleViewModel}" Spacing="10">
-                <TextBlock>Enter your Name:</TextBlock>
-                <TextBox Text="{Binding Name}" />
-                <TextBox Text="{Binding Greeting, Mode=OneWay}"
-                         IsReadOnly="True"
-                         FontWeight="Bold" />
-            </StackPanel>
-        </TabItem>
-        <!-- Our ReactiveViewModel -->
-        <TabItem Header="Reactive UI" >
-            <StackPanel DataContext="{Binding ReactiveViewModel}" Spacing="10">
-                <TextBlock>Enter your Name:</TextBlock>
-                <TextBox Text="{Binding Name}" />
-                <TextBox Text="{Binding Greeting, Mode=OneWay}"
-                         IsReadOnly="True"
-                         FontWeight="Bold" />
-                
-                <Button Command="{Binding SaveAsync}" CommandParameter="Hello World"
+
+    <Grid RowDefinitions="Auto, Auto, *" ColumnDefinitions="Auto, *">
+
+       
+        
+        <ListBox Grid.Column="0" Grid.Row="0" Width="200" x:Name="databases"
+                 ItemsSource="{Binding Databases}"
+                 SelectedItem="{Binding SelectedDatabase}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Border BorderBrush="Blue" BorderThickness="1"
+                            CornerRadius="4" Padding="4">
+                        <TextBlock Text="{Binding}" />
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <StackPanel Grid.Column="1" Grid.Row="0"
+                    Spacing="5" Margin="5">
+
+            <StackPanel Orientation="Vertical" Spacing="5">
+                <TextBox Text="{Binding ConnectionString}" Watermark="Connection string" />
+                <TextBox Text="{Binding Query}" Watermark="Query" />
+
+                <Button Command="{Binding SaveSettingsAsyncCommand}"
                         Content="Save" />
             </StackPanel>
-            
-        </TabItem>
-    </TabControl>
+            <Button Command="{Binding QueryAsyncCommand}"
+                    Content="Query" />
+
+        </StackPanel>
+
+        <Separator Grid.Row="1" Grid.ColumnSpan="2"
+                   HorizontalAlignment="Stretch"
+                   Margin="5"
+                   Height="2"
+                   Background="LightGray" />
+
+        <TextBlock Grid.Column="0" Grid.Row="2"
+                   Text="HAL 9000:"
+                   FontWeight="Bold"
+                   Margin="5"
+                   VerticalAlignment="Center" />
+        <ListBox Grid.Column="0" Grid.Row="2" Width="200" x:Name="documents"
+                 ItemsSource="{Binding Documents}"
+                 SelectedItem="{Binding SelectedDocument}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Border BorderBrush="Blue" BorderThickness="1"
+                            CornerRadius="4" Padding="4">
+                        <TextBlock Text="{Binding}" />
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <Border Grid.Column="1" Grid.Row="2"
+                CornerRadius="10" Margin="5"
+                BorderThickness="1" BorderBrush="{DynamicResource SystemAccentColor}">
+
+            <Grid ColumnDefinitions="*,Auto">
+                <ItemsControl Margin="5"
+                              ItemsSource="{Binding FullDocuments}" />
+
+                <Button Grid.Column="1"
+                        VerticalAlignment="Stretch" VerticalContentAlignment="Center"
+                        Background="Transparent"
+                        Command="{Binding FullDocuments.Clear}"
+                        Content="❌" />
+            </Grid>
+        </Border>
+    </Grid>
 </Window>

@@ -48,7 +48,7 @@ public class FileSystemUserSettingsService : IUserSettingsService
         using var settingsFileStream = new FileStream(settingsFilePath, FileMode.OpenOrCreate);
         await JsonSerializer.SerializeAsync(settingsFileStream, userSettings);
 
-        userSettings = userSettings;
+        this.userSettings = userSettings;
     }
 
     private static string GetSettingsFolderPath()

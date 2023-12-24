@@ -54,7 +54,7 @@ sealed class Program
     private static void ConfigureServices(IServiceCollection services)
     {
         services.AddSingleton<ICosmosDBDocumentService, CosmosDBDocumentService>();
-       services.AddSingleton<IUserSettingsService, FileSystemUserSettingsService>();
+        services.AddSingleton<IUserSettingsService, FileSystemUserSettingsService>();
         services.AddSingleton<IContainerModel, CosmosDbContainerModel>();
         services.AddSingleton<IDatabaseModel, CosmosDbDatabaseModel>();
         services.AddSingleton<IConnectionService,CosmosDbConnectionService>();
