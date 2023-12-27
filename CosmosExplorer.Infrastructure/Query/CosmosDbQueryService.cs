@@ -18,6 +18,7 @@ namespace CosmosExplorer.Infrastructure.Query
         public async Task<string> GetDocumentAsync(string partitionName, string id)
         {
 
+            if (id is null) return null;
             var response = await connectionService.container.ReadItemAsync<dynamic>(id, new PartitionKey(partitionName));
 
             return response.Resource.ToString();

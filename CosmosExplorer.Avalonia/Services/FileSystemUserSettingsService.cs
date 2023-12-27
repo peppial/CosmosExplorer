@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
+using CosmosExplorer.Core;
 using CosmosExplorer.Core.Models;
 using CosmosExplorer.Core.State;
 using Microsoft.Azure.Cosmos;
@@ -15,30 +16,30 @@ public class FileSystemUserSettingsService : IUserSettingsService
 
     private readonly string settingsFolderPath = GetSettingsFolderPath();
     private readonly string settingsFilePath = GetSettingsFilePath();
-    private UserSettings userSettings;
+    private IStateContainer stateContainer;
     
-    public async Task<UserSettings> GetSettingsAsync()
+    public async Task<IStateContainer> GetSettingsAsync()
     {
-        if (userSettings is null)
+        if (stateContainer is null)
         {
             if (!File.Exists(settingsFilePath))
             {
-                await SaveSettingsAsync(new UserSettings());
+                await SaveSettingsAsync(new StateContainer());
             }
 
             using var settingsFileStream = new FileStream(settingsFilePath, FileMode.Open);
-            userSettings = await JsonSerializer.DeserializeAsync<UserSettings>(settingsFileStream);
+            stateContainer = await JsonSerializer.DeserializeAsync<StateContainer>(settingsFileStream);
 
-            if (userSettings is null)
+            if (stateContainer is null)
             {
                 throw new InvalidOperationException("Can't deserialize user settings");
             }
         }
 
-        return userSettings;
+        return stateContainer;
     }
 
-    public async Task SaveSettingsAsync(UserSettings userSettings)
+    public async Task SaveSettingsAsync(IStateContainer stateContainer)
     {
         if (!Directory.Exists(settingsFolderPath))
         {
@@ -46,9 +47,9 @@ public class FileSystemUserSettingsService : IUserSettingsService
         }
 
         using var settingsFileStream = new FileStream(settingsFilePath, FileMode.OpenOrCreate);
-        await JsonSerializer.SerializeAsync(settingsFileStream, userSettings);
+        await JsonSerializer.SerializeAsync(settingsFileStream, stateContainer);
 
-        this.userSettings = userSettings;
+        this.stateContainer = stateContainer;
     }
 
     private static string GetSettingsFolderPath()

@@ -21,4 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\CosmosExplorer.Core\CosmosExplorer.Core.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.0.6" />
+  </ItemGroup>
 </Project>

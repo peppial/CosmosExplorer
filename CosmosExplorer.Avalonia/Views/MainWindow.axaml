@@ -11,77 +11,87 @@
     <Design.DataContext>
         <vm:MainWindowViewModel />
     </Design.DataContext>
+    <TabControl>
+        <TabItem Header="Cosmos Explorer">
+            <Grid RowDefinitions="Auto, Auto, *" ColumnDefinitions="Auto, *">
+                <ListBox Grid.Column="0" Grid.Row="0" Width="200" x:Name="databases"
+                         ItemsSource="{Binding Databases}"
+                         SelectedItem="{Binding SelectedDatabase}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="Blue" BorderThickness="1"
+                                    CornerRadius="4" Padding="4">
+                                <TextBlock Text="{Binding}" />
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
 
-    <Grid RowDefinitions="Auto, Auto, *" ColumnDefinitions="Auto, *">
+                <StackPanel Grid.Column="1" Grid.Row="0"
+                            Spacing="5" Margin="5">
 
-       
-        
-        <ListBox Grid.Column="0" Grid.Row="0" Width="200" x:Name="databases"
-                 ItemsSource="{Binding Databases}"
-                 SelectedItem="{Binding SelectedDatabase}">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <Border BorderBrush="Blue" BorderThickness="1"
-                            CornerRadius="4" Padding="4">
-                        <TextBlock Text="{Binding}" />
-                    </Border>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+                    <StackPanel Orientation="Vertical" Spacing="5">
+                        <TextBox Text="{Binding Query}" Watermark="SELECT * FROM c" />
 
-        <StackPanel Grid.Column="1" Grid.Row="0"
-                    Spacing="5" Margin="5">
+                       
+                    </StackPanel>
+                    <Button Command="{Binding QueryAsyncCommand}"
+                            Content="Query" />
 
-            <StackPanel Orientation="Vertical" Spacing="5">
-                <TextBox Text="{Binding ConnectionString}" Watermark="Connection string" />
-                <TextBox Text="{Binding Query}" Watermark="Query" />
+                </StackPanel>
 
-                <Button Command="{Binding SaveSettingsAsyncCommand}"
-                        Content="Save" />
-            </StackPanel>
-            <Button Command="{Binding QueryAsyncCommand}"
-                    Content="Query" />
+                <Separator Grid.Row="1" Grid.ColumnSpan="2"
+                           HorizontalAlignment="Stretch"
+                           Margin="5"
+                           Height="2"
+                           Background="LightGray" />
 
-        </StackPanel>
+                <TextBlock Grid.Column="0" Grid.Row="2"
+                           Text="HAL 9000:"
+                           FontWeight="Bold"
+                           Margin="5"
+                           VerticalAlignment="Center" />
+                <ListBox Grid.Column="0" Grid.Row="2"  x:Name="documents"
+                         ItemsSource="{Binding Documents}"
+                         SelectedItem="{Binding SelectedDocument}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="Blue" BorderThickness="1"
+                                    CornerRadius="4" Padding="4">
+                                <SelectableTextBlock Text="{Binding}" />
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
 
-        <Separator Grid.Row="1" Grid.ColumnSpan="2"
-                   HorizontalAlignment="Stretch"
-                   Margin="5"
-                   Height="2"
-                   Background="LightGray" />
+                <Border Grid.Column="1" Grid.Row="2"
+                        CornerRadius="10" Margin="5"
+                        BorderThickness="1" BorderBrush="{DynamicResource SystemAccentColor}">
 
-        <TextBlock Grid.Column="0" Grid.Row="2"
-                   Text="HAL 9000:"
-                   FontWeight="Bold"
-                   Margin="5"
-                   VerticalAlignment="Center" />
-        <ListBox Grid.Column="0" Grid.Row="2" Width="200" x:Name="documents"
-                 ItemsSource="{Binding Documents}"
-                 SelectedItem="{Binding SelectedDocument}">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <Border BorderBrush="Blue" BorderThickness="1"
-                            CornerRadius="4" Padding="4">
-                        <TextBlock Text="{Binding}" />
-                    </Border>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <SelectableTextBlock Text="{Binding FullDocuments[0]}" />
 
-        <Border Grid.Column="1" Grid.Row="2"
-                CornerRadius="10" Margin="5"
-                BorderThickness="1" BorderBrush="{DynamicResource SystemAccentColor}">
-
-            <Grid ColumnDefinitions="*,Auto">
-                <ItemsControl Margin="5"
-                              ItemsSource="{Binding FullDocuments}" />
-
-                <Button Grid.Column="1"
-                        VerticalAlignment="Stretch" VerticalContentAlignment="Center"
-                        Background="Transparent"
-                        Command="{Binding FullDocuments.Clear}"
-                        Content="❌" />
+                      
+                    </Grid>
+                </Border>
             </Grid>
-        </Border>
-    </Grid>
+        </TabItem>
+        <TabItem Header="Connections">
+            <StackPanel DataContext="{Binding }" Spacing="10">
+                <DataGrid Margin="20" ItemsSource="{Binding ConnectionStrings}" 
+                          SelectedItem="{Binding SelectedConnectionString}"
+                          AutoGenerateColumns="True" IsReadOnly="True" 
+                          GridLinesVisibility="All"
+                          BorderThickness="1" BorderBrush="Gray">
+                </DataGrid>
+                
+                <TextBox Text="{Binding ConnectionStringName}" Watermark="Connection string name" />
+
+                <TextBox Text="{Binding ConnectionString}" Watermark="Connection string" />
+                <Button Command="{Binding SaveSettingsAsyncCommand}"
+                        Content="Add" />
+            </StackPanel>
+        </TabItem>
+    </TabControl>
+
 </Window>

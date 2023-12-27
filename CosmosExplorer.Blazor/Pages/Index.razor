@@ -95,7 +95,7 @@
         
         stateContainer.ConnectionString = connectionString;
         var strings = stateContainer.ConnectionStrings;
-        strings.Add(new PreferenceConnectionString { Name = connectionStringName, ConnectionString = connectionString, Selected = true });
+        strings.Add(new PreferenceConnectionString ( connectionStringName, connectionString,true ));
         stateContainer.ConnectionStrings = strings;
         SelectConnectionString(connectionString);
         modal.Close();

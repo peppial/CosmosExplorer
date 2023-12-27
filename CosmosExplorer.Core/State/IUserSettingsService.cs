@@ -4,6 +4,6 @@ namespace CosmosExplorer.Core.State;
 
 public interface IUserSettingsService
 {
-    Task<UserSettings> GetSettingsAsync();
-    Task SaveSettingsAsync(UserSettings userSettings);
+    Task<IStateContainer> GetSettingsAsync();
+    Task SaveSettingsAsync(IStateContainer stateContainer);
 }
