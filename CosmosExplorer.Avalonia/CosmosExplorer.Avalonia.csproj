@@ -24,12 +24,27 @@
         <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.6" />
         <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.6" />
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+        <PackageReference Include="DotNet.Bundle" Version="0.9.13" />
         <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
         <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
+        <PackageReference Include="Splat.Avalonia.Microsoft.Extensions.DependencyInjection" Version="14.8.12" />
+        <PackageReference Include="Splat.Microsoft.Extensions.DependencyInjection" Version="14.8.12" />
     </ItemGroup>
-
+    <PropertyGroup>
+        <CFBundleName>Cosmos Explorer</CFBundleName> <!-- Also defines .app file name -->
+        <CFBundleDisplayName>Cosmos Explorer</CFBundleDisplayName>
+        <CFBundleIdentifier>com.cosmosexplorer</CFBundleIdentifier>
+        <CFBundleVersion>1.0.0</CFBundleVersion>
+        <CFBundlePackageType>APPL</CFBundlePackageType>
+        <CFBundleSignature>????</CFBundleSignature>
+        <CFBundleExecutable>CosmosExplorer</CFBundleExecutable>
+        <CFBundleIconFile>AppName.icns</CFBundleIconFile> <!-- Will be copied from output directory -->
+        <NSPrincipalClass>NSApplication</NSPrincipalClass>
+        <NSHighResolutionCapable>true</NSHighResolutionCapable>
+        <CFBundleShortVersionString>1.0</CFBundleShortVersionString>
+    </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\CosmosExplorer.Domain\CosmosExplorer.Domain.csproj" />
@@ -39,5 +54,13 @@
 
     <ItemGroup>
       <Folder Include="Models\" />
+    </ItemGroup>
+
+
+    <ItemGroup>
+        <Content Include="Assets\favicon.ico">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Folder Include="Assets\*" />
     </ItemGroup>
 </Project>

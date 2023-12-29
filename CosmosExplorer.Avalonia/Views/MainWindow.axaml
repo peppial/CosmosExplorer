@@ -6,7 +6,7 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="CosmosExplorer.Avalonia.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/favicon.ico" 
         Title="CosmosExplorer.Avalonia">
     <Design.DataContext>
         <vm:MainWindowViewModel />
@@ -14,9 +14,10 @@
     <TabControl>
         <TabItem Header="Cosmos Explorer">
             <Grid RowDefinitions="Auto, Auto, *" ColumnDefinitions="Auto, *">
-                <ListBox Grid.Column="0" Grid.Row="0" Width="200" x:Name="databases"
+                <ListBox Grid.Column="0" Grid.Row="0" Width="200" x:Name="databases" Height="200"
                          ItemsSource="{Binding Databases}"
-                         SelectedItem="{Binding SelectedDatabase}">
+                         SelectedItem="{Binding SelectedDatabase}" 
+                         >
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <Border BorderBrush="Blue" BorderThickness="1"
@@ -45,12 +46,7 @@
                            Margin="5"
                            Height="2"
                            Background="LightGray" />
-
-                <TextBlock Grid.Column="0" Grid.Row="2"
-                           Text="HAL 9000:"
-                           FontWeight="Bold"
-                           Margin="5"
-                           VerticalAlignment="Center" />
+                
                 <ListBox Grid.Column="0" Grid.Row="2"  x:Name="documents"
                          ItemsSource="{Binding Documents}"
                          SelectedItem="{Binding SelectedDocument}">
@@ -69,8 +65,9 @@
                         BorderThickness="1" BorderBrush="{DynamicResource SystemAccentColor}">
 
                     <Grid ColumnDefinitions="*,Auto">
-                        <SelectableTextBlock Text="{Binding FullDocuments[0]}" />
-
+                        <ScrollViewer>
+                        <SelectableTextBlock Text="{Binding FullDocuments[0]}"  />
+</ScrollViewer>
                       
                     </Grid>
                 </Border>

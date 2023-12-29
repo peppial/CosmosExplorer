@@ -103,8 +103,7 @@ namespace CosmosExplorer.Avalonia.ViewModels
             QueryAsyncCommand = ReactiveCommand.CreateFromTask(QueryAsync); 
             GetDocumentAsyncCommand = ReactiveCommand.CreateFromTask(GetDocumentAsync);
             ChangeConnectionStringCommand = ReactiveCommand.CreateFromTask(ChangeConnectionStringAsync); 
-            
-
+   
             LoadSettingsAsyncCommand.Execute(null);
             
         }
@@ -122,12 +121,14 @@ namespace CosmosExplorer.Avalonia.ViewModels
 
         private async Task ReloadAsync()
         {
+            Databases.Clear();
             var databases = await cosmosDbDocumentService.GetDatabasesAsync();
             SelectedDatabase = null;
-            Databases.Clear();
-            foreach (var database in databases)
+            
+            foreach (var database in databases.OrderBy(x=>x.Id))
             {
-                foreach (var container in database.Containers)
+                
+                foreach (var container in database.Containers.OrderBy(x=>x.Id))
                 {
                     Databases.Add((database.Id, container.Id));
                 }
@@ -137,10 +138,12 @@ namespace CosmosExplorer.Avalonia.ViewModels
         }
 
         private async Task SaveSettingsAsync()
-        { 
-            stateContainer.ConnectionStrings.Add(new PreferenceConnectionString(connectionStringName,connectionString,true));
+        {
+            var addConnectionString = new PreferenceConnectionString(connectionStringName, connectionString, true);
+            stateContainer.ConnectionStrings.Add(addConnectionString);
             await userSettingsService.SaveSettingsAsync(stateContainer);
-            await LoadSettingsAsync();
+            ConnectionStrings.Add(addConnectionString);
+            connectionStringName = connectionString = "";
         }
         
         private async Task QueryAsync()
@@ -173,7 +176,7 @@ namespace CosmosExplorer.Avalonia.ViewModels
             if (selectedConnectionString is null) return;
             
             stateContainer.ConnectionString = selectedConnectionString.ConnectionString;
-            
+            await userSettingsService.SaveSettingsAsync(stateContainer);
             await ReloadAsync();
         }
     }
