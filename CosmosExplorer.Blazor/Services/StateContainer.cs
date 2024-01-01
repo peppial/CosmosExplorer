@@ -32,13 +32,13 @@ namespace CosmosExplorer.Blazor.Services
 			set { Preferences.Default.Set(ConnectionStringsName, JsonConvert.SerializeObject(value)); }
         }
 
-        public List<(string query, string connectionString, string database, string container)> LastQueries
+        public List<LastQuery> LastQueries
         {
             get
             {
                 //List<(string, string, string)> values = new List<(string, string, string)>();
                 //Preferences.Default.Set(LastQueriesName, JsonConvert.SerializeObject(values));
-                return JsonConvert.DeserializeObject<List<(string, string, string, string)>>(Preferences.Default.Get<string>(LastQueriesName, "[]"));
+                return JsonConvert.DeserializeObject<List<LastQuery>>(Preferences.Default.Get<string>(LastQueriesName, "[]"));
             }
             set { Preferences.Default.Set(LastQueriesName, JsonConvert.SerializeObject(value)); }
         }

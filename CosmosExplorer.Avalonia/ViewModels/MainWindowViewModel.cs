@@ -21,14 +21,17 @@ namespace CosmosExplorer.Avalonia.ViewModels
         public ICommand QueryAsyncCommand { get; }
         public ICommand GetDocumentAsyncCommand { get; }
         public ICommand ChangeConnectionStringCommand { get; }
-
-        public ObservableCollection<string> FullDocuments { get; } = new ();
-        public ObservableCollection<(string, string)> Documents { get; set; } = new ();
-        public ObservableCollection<(string database, string container)> Databases { get; set; } = new ();
+        public ICommand ReLoadAsyncCommand { get; }
 
 
-        public ObservableCollection<PreferenceConnectionString> ConnectionStrings { get; set; }
-        
+        public ObservableCollection<string> FullDocuments { get; } = [];
+        public ObservableCollection<(string, string)> Documents { get; set; } = [];
+        public ObservableCollection<(string database, string container)> Databases { get; set; } = [];
+
+
+        public ObservableCollection<PreferenceConnectionString> ConnectionStrings { get; set; } = [];
+        public ObservableCollection<string> LastQueries { get; set; } = [];
+
         private string? connectionString;
         public string? ConnectionString
         {
@@ -65,7 +68,6 @@ namespace CosmosExplorer.Avalonia.ViewModels
             }
         }
         
-       
         private (string database, string container)? selectedDatabase;
         public (string database, string container)? SelectedDatabase
         {
@@ -85,7 +87,7 @@ namespace CosmosExplorer.Avalonia.ViewModels
             get { return selectedConnectionString; }
             set
             {
-                if (selectedConnectionString == value)
+                if (selectedConnectionString == value || value is null)
                     return;
                 selectedConnectionString = value;
                 ChangeConnectionStringCommand.Execute(null);
@@ -103,7 +105,7 @@ namespace CosmosExplorer.Avalonia.ViewModels
             QueryAsyncCommand = ReactiveCommand.CreateFromTask(QueryAsync); 
             GetDocumentAsyncCommand = ReactiveCommand.CreateFromTask(GetDocumentAsync);
             ChangeConnectionStringCommand = ReactiveCommand.CreateFromTask(ChangeConnectionStringAsync); 
-   
+            ReLoadAsyncCommand = ReactiveCommand.CreateFromTask(ReloadAsync); 
             LoadSettingsAsyncCommand.Execute(null);
             
         }
@@ -113,28 +115,36 @@ namespace CosmosExplorer.Avalonia.ViewModels
             var loaded = await userSettingsService.GetSettingsAsync();
             stateContainer.ConnectionStrings = loaded.ConnectionStrings;
             stateContainer.ConnectionString = loaded.ConnectionString;
+            SelectedConnectionString = loaded.ConnectionStrings.FirstOrDefault(c => c.Selected);
 
             ConnectionStrings = new (this.stateContainer.ConnectionStrings);
-          
             await ReloadAsync();
         }
 
         private async Task ReloadAsync()
         {
             Databases.Clear();
-            var databases = await cosmosDbDocumentService.GetDatabasesAsync();
-            SelectedDatabase = null;
-            
-            foreach (var database in databases.OrderBy(x=>x.Id))
+            try
             {
-                
-                foreach (var container in database.Containers.OrderBy(x=>x.Id))
+                var databases = await cosmosDbDocumentService.GetDatabasesAsync();
+                SelectedDatabase = null;
+
+                foreach (var database in databases.OrderBy(x => x.Id))
                 {
-                    Databases.Add((database.Id, container.Id));
+
+                    foreach (var container in database.Containers.OrderBy(x => x.Id))
+                    {
+                        Databases.Add((database.Id, container.Id));
+                    }
                 }
+                SelectedDatabase = Databases[0];
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
             }
 
-            SelectedDatabase = Databases[0];
+            
         }
 
         private async Task SaveSettingsAsync()
@@ -156,12 +166,30 @@ namespace CosmosExplorer.Avalonia.ViewModels
                 selectedDocument = null;
                 Documents.Clear();
                 Documents.AddRange(result.ToArray());
-
+                AddLastQuery(query);
+                await userSettingsService.SaveSettingsAsync(stateContainer);
+                
             }
             catch (Exception e)
             {
-                
+                Console.WriteLine(e);
             }
+        }
+
+        private void AddLastQuery(string query)
+        {
+            var list = stateContainer.LastQueries;
+            if (list.Count > 0 && list[0].Query == query) return;
+            var item = new LastQuery(query,stateContainer.ConnectionString, stateContainer.Database, stateContainer.Container);
+            list.Insert(0, item);
+            if (list.Count > 10) list.RemoveAt(10);
+            stateContainer.LastQueries = list;
+            LastQueries.Clear();
+            LastQueries.Add(stateContainer.LastQueries.Where(c =>
+                c.Database == stateContainer.Database
+                && c.Container == stateContainer.Container
+                && c.ConnectionString == stateContainer.ConnectionString
+            ).Select(x => x.Query).ToArray());
         }
 
         private async Task GetDocumentAsync()
@@ -170,14 +198,29 @@ namespace CosmosExplorer.Avalonia.ViewModels
             FullDocuments.Clear();
             FullDocuments.Add(doc);
         }
-        
+
         private async Task ChangeConnectionStringAsync()
         {
             if (selectedConnectionString is null) return;
-            
+
             stateContainer.ConnectionString = selectedConnectionString.ConnectionString;
+
+            SetSelectedConnectionString();
+
             await userSettingsService.SaveSettingsAsync(stateContainer);
             await ReloadAsync();
+        }
+
+        private void SetSelectedConnectionString()
+        {
+            for (int i = 0; i < stateContainer.ConnectionStrings.Count; i++)
+            {
+                stateContainer.ConnectionStrings[i] = stateContainer.ConnectionStrings[i] with
+                {
+                    Selected =
+                    selectedConnectionString.ConnectionString==stateContainer.ConnectionStrings[i].ConnectionString
+                };
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using CosmosExplorer.Core;
 using CosmosExplorer.Core.Models;
@@ -17,6 +18,7 @@ public class FileSystemUserSettingsService : IUserSettingsService
     private readonly string settingsFolderPath = GetSettingsFolderPath();
     private readonly string settingsFilePath = GetSettingsFilePath();
     private IStateContainer stateContainer;
+    SemaphoreSlim semaphore = new SemaphoreSlim(initialCount:1);
     
     public async Task<IStateContainer> GetSettingsAsync()
     {
@@ -27,8 +29,16 @@ public class FileSystemUserSettingsService : IUserSettingsService
                 await SaveSettingsAsync(new StateContainer());
             }
 
-            using var settingsFileStream = new FileStream(settingsFilePath, FileMode.Open);
-            stateContainer = await JsonSerializer.DeserializeAsync<StateContainer>(settingsFileStream);
+            await semaphore.WaitAsync();
+            try
+            {
+                using var settingsFileStream = new FileStream(settingsFilePath, FileMode.Open);
+                stateContainer = await JsonSerializer.DeserializeAsync<StateContainer>(settingsFileStream);            
+            }
+            finally
+            {
+                semaphore.Release();
+            }
 
             if (stateContainer is null)
             {
@@ -45,9 +55,16 @@ public class FileSystemUserSettingsService : IUserSettingsService
         {
             Directory.CreateDirectory(settingsFolderPath);
         }
-
-        using var settingsFileStream = new FileStream(settingsFilePath, FileMode.OpenOrCreate);
-        await JsonSerializer.SerializeAsync(settingsFileStream, stateContainer);
+        await semaphore.WaitAsync();
+        try
+        {
+            using var settingsFileStream = new FileStream(settingsFilePath, FileMode.Create);
+            await JsonSerializer.SerializeAsync(settingsFileStream, stateContainer);
+        }
+        finally
+        {
+            semaphore.Release();
+        }
 
         this.stateContainer = stateContainer;
     }

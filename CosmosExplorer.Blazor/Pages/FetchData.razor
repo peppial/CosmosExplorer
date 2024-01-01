@@ -57,7 +57,7 @@
     <div class="col-5">
         @if (!string.IsNullOrEmpty(stateContainer.Container))
         {
-            <textarea  @bind="query.query"  placeholder="SELECT * FROM c" cols="80" rows="5" class="largeFont"></textarea>
+            <textarea   placeholder="SELECT * FROM c" cols="80" rows="5" class="largeFont"></textarea>
             <p></p>
             <button class="btn btn-primary" @onclick="QueryAsync">Query</button>
             <button class="btn btn-primary" @onclick="New">New</button>
@@ -91,10 +91,10 @@
                 <tbody>
                     @foreach (var item in stateContainer.LastQueries)
                     {
-                        if (item.connectionString == stateContainer.ConnectionString && item.database == stateContainer.Database && item.container == stateContainer.Container)
+                        if (item.ConnectionString == stateContainer.ConnectionString && item.Database == stateContainer.Database && item.Container == stateContainer.Container)
                         {
                             <tr @onclick="() => QueryAsync(item)">
-                                <td>@item.query</td>
+                                <td>@item.Query</td>
 
                             </tr>
                         }
@@ -106,10 +106,11 @@
 </div>
 
 @code {
+    //<!--@bind="query.query"--> 
     private const int initialCount = 100;
         private int currentCount;
         private IEnumerable<IDatabaseModel> databases;
-        private (string query, string connectionString, string database, string container) query;
+        private LastQuery query;
         private IEnumerable<(string, string)> result;
         private int count;
         private string documentString;
@@ -175,9 +176,9 @@
             loading = false;
         }
 
-        private async Task QueryAsync((string query, string connectionString, string database, string container) item)
+        private async Task QueryAsync(LastQuery item)
         {
-            if (stateContainer.ConnectionString != item.connectionString || stateContainer.Container != item.container)
+            if (stateContainer.ConnectionString != item.ConnectionString || stateContainer.Container != item.Container)
                 return;
 
             documentString = null;
@@ -215,9 +216,12 @@
             try
             {
                 currentCount = initialCount;
-                (result, count) = await CosmosDBDocumentService.QueryAsync(query.query, currentCount);
-                query.connectionString = stateContainer.ConnectionString;
-                query.container = stateContainer.Container;
+                (result, count) = await CosmosDBDocumentService.QueryAsync(query.Query, currentCount);
+                query = query with
+                {
+                    ConnectionString = stateContainer.ConnectionString,
+                    Container = stateContainer.Container
+                };
                 AddLastQuery(query);
 
             }
@@ -236,7 +240,7 @@
             try
             {
                 currentCount += initialCount;
-                (result, count) = await CosmosDBDocumentService.QueryAsync(query.query, currentCount);
+                (result, count) = await CosmosDBDocumentService.QueryAsync(query.Query, currentCount);
                 AddLastQuery(query);
             }
             catch (Exception e)
@@ -246,7 +250,7 @@
             loading = false;
         }
 
-        private void AddLastQuery((string query, string connectionString, string database, string container) item)
+        private void AddLastQuery(LastQuery item)
         {
             var list = stateContainer.LastQueries;
             if (list.Count > 0 && list[0] == item) return;
@@ -276,7 +280,7 @@
             try
             {
                 loading = true;
-                query = ("", stateContainer.ConnectionString, database, containerName);
+                query = new LastQuery("", stateContainer.ConnectionString, database, containerName);
                 await CosmosDBDocumentService.ChangeContainerAsync(database, containerName);
                 loading = false;
             }

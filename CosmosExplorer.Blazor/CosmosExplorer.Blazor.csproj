@@ -1,11 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
     <PropertyGroup>
-        <TargetFrameworks>net7.0-android;net7.0-ios;net7.0-maccatalyst</TargetFrameworks>
         <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net7.0-windows10.0.19041.0</TargetFrameworks>
         <!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
         <!-- <TargetFrameworks>$(TargetFrameworks);net7.0-tizen</TargetFrameworks> -->
-        <OutputType>Exe</OutputType>
         <RootNamespace>CosmosExplorer.Blazor</RootNamespace>
         <UseMaui>true</UseMaui>
         <SingleProject>true</SingleProject>
@@ -31,6 +29,8 @@
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
         <Title>Cosmos Explorer</Title>
         <Product>Cosmos Explorer</Product>
+        <TargetFramework>net8.0</TargetFramework>
+        <LangVersion>12</LangVersion>
     </PropertyGroup>
 
     <PropertyGroup>

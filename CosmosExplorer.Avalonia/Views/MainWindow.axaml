@@ -3,85 +3,109 @@
         xmlns:vm="using:CosmosExplorer.Avalonia.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:drawing="clr-namespace:System.Drawing;assembly=System.Drawing.Primitives"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="CosmosExplorer.Avalonia.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/favicon.ico" 
-        Title="CosmosExplorer.Avalonia">
+        Icon="/Assets/favicon.ico"
+        RequestedThemeVariant="Light"
+        Title="Lite Cosmos Explorer">
     <Design.DataContext>
         <vm:MainWindowViewModel />
     </Design.DataContext>
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <SolidColorBrush x:Key="ButtonBackgroundApp" Color="{DynamicResource SystemAccentColorLight2}"
+                             Opacity=".35" />
+            <StaticResource x:Key="ButtonBackground" ResourceKey="ButtonBackgroundApp" />
+            <SolidColorBrush x:Key="BackgroundApp" Color="{DynamicResource SystemAccentColorLight2}"
+                             Opacity=".35" />
+            <StaticResource x:Key="Background" ResourceKey="BackgroundApp" />
+        </ResourceDictionary>
+    </Window.Resources>
+    <Window.Styles>
+        <Style Selector="DataGridCell:selected">
+            <Setter Property="Background" Value="LightSteelBlue" />
+
+        </Style>
+        <Style Selector="DataGridCell:focus">
+            <Setter Property="Background" Value="LightSteelBlue" />
+        </Style>
+        <Style Selector="DataGridCell:editing">
+            <Setter Property="Background" Value="LightSteelBlue" />
+        </Style>
+        <Style Selector="DataGridRow:selected">
+            <Setter Property="Background" Value="LightSteelBlue" />
+        </Style>
+        <Style Selector="DataGridRow:focus">
+            <Setter Property="Background" Value="LightSteelBlue" />
+        </Style>
+        <Style Selector="DataGridRow:editing">
+            <Setter Property="Background" Value="LightSteelBlue" />
+        </Style>
+    </Window.Styles>
     <TabControl>
-        <TabItem Header="Cosmos Explorer">
-            <Grid RowDefinitions="Auto, Auto, *" ColumnDefinitions="Auto, *">
-                <ListBox Grid.Column="0" Grid.Row="0" Width="200" x:Name="databases" Height="200"
+        <TabItem Header="Cosmos Explorer" FontSize="16">
+            <Grid RowDefinitions="3*,3, 7*" ColumnDefinitions="4*,3,6*">
+                <ListBox Grid.Column="0" Grid.Row="0" x:Name="databases"
                          ItemsSource="{Binding Databases}"
-                         SelectedItem="{Binding SelectedDatabase}" 
-                         >
+                         SelectedItem="{Binding SelectedDatabase}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <Border BorderBrush="Blue" BorderThickness="1"
-                                    CornerRadius="4" Padding="4">
+                            <Border BorderThickness="1"
+                                    CornerRadius="1" Padding="2">
                                 <TextBlock Text="{Binding}" />
                             </Border>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-
-                <StackPanel Grid.Column="1" Grid.Row="0"
+                <ListBox Grid.Column="0" Grid.Row="2" x:Name="documents"
+                         ItemsSource="{Binding Documents}"
+                         SelectedItem="{Binding SelectedDocument}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderThickness="1"
+                                    CornerRadius="1" Padding="2">
+                                <TextBlock Text="{Binding}" />
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <StackPanel Grid.Column="2" Grid.Row="0"
                             Spacing="5" Margin="5">
+                    <AutoCompleteBox x:Name="query" ItemsSource="{Binding LastQueries}" Text="{Binding Query}"
+                                     FilterMode="StartsWith" Watermark="SELECT * FROM c" />
 
-                    <StackPanel Orientation="Vertical" Spacing="5">
-                        <TextBox Text="{Binding Query}" Watermark="SELECT * FROM c" />
-
-                       
-                    </StackPanel>
                     <Button Command="{Binding QueryAsyncCommand}"
                             Content="Query" />
 
                 </StackPanel>
 
-                <Separator Grid.Row="1" Grid.ColumnSpan="2"
-                           HorizontalAlignment="Stretch"
-                           Margin="5"
-                           Height="2"
-                           Background="LightGray" />
-                
-                <ListBox Grid.Column="0" Grid.Row="2"  x:Name="documents"
-                         ItemsSource="{Binding Documents}"
-                         SelectedItem="{Binding SelectedDocument}">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <Border BorderBrush="Blue" BorderThickness="1"
-                                    CornerRadius="4" Padding="4">
-                                <SelectableTextBlock Text="{Binding}" />
-                            </Border>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-
-                <Border Grid.Column="1" Grid.Row="2"
-                        CornerRadius="10" Margin="5"
-                        BorderThickness="1" BorderBrush="{DynamicResource SystemAccentColor}">
+               
+                <Border Grid.Column="2" Grid.Row="3"
+                        CornerRadius="4" Margin="5"
+                        BorderThickness="1" BorderBrush="{DynamicResource SystemBaseMediumColor}">
 
                     <Grid ColumnDefinitions="*,Auto">
                         <ScrollViewer>
-                        <SelectableTextBlock Text="{Binding FullDocuments[0]}"  />
-</ScrollViewer>
-                      
+                            <SelectableTextBlock Text="{Binding FullDocuments[0]}" />
+                        </ScrollViewer>
+
                     </Grid>
                 </Border>
             </Grid>
         </TabItem>
-        <TabItem Header="Connections">
+        <TabItem Header="Connections" FontSize="16">
             <StackPanel DataContext="{Binding }" Spacing="10">
-                <DataGrid Margin="20" ItemsSource="{Binding ConnectionStrings}" 
+
+                <DataGrid Margin="20" ItemsSource="{Binding ConnectionStrings}"
                           SelectedItem="{Binding SelectedConnectionString}"
-                          AutoGenerateColumns="True" IsReadOnly="True" 
+                          AutoGenerateColumns="True" IsReadOnly="True"
                           GridLinesVisibility="All"
                           BorderThickness="1" BorderBrush="Gray">
                 </DataGrid>
-                
+
                 <TextBox Text="{Binding ConnectionStringName}" Watermark="Connection string name" />
 
                 <TextBox Text="{Binding ConnectionString}" Watermark="Connection string" />
