@@ -26,7 +26,7 @@ namespace CosmosExplorer.Avalonia.ViewModels
 
         public ObservableCollection<string> FullDocuments { get; } = [];
         public ObservableCollection<(string, string)> Documents { get; set; } = [];
-        public ObservableCollection<(string database, string container)> Databases { get; set; } = [];
+        public ObservableCollection<DatabaseViewModel> Databases { get; set; } = [];
 
 
         public ObservableCollection<PreferenceConnectionString> ConnectionStrings { get; set; } = [];
@@ -68,8 +68,8 @@ namespace CosmosExplorer.Avalonia.ViewModels
             }
         }
         
-        private (string database, string container)? selectedDatabase;
-        public (string database, string container)? SelectedDatabase
+        private DatabaseViewModel? selectedDatabase;
+        public DatabaseViewModel? SelectedDatabase
         {
             get { return selectedDatabase; }
             set
@@ -77,7 +77,8 @@ namespace CosmosExplorer.Avalonia.ViewModels
                 if (selectedDatabase == value)
                     return;
                 selectedDatabase = value;
-                GetDocumentAsyncCommand.Execute(null);
+                Documents.Clear();
+                FullDocuments.Clear();
             }
         }
         
@@ -160,7 +161,7 @@ namespace CosmosExplorer.Avalonia.ViewModels
         {
             try
             {
-                await cosmosDbDocumentService.ChangeContainerAsync(selectedDatabase?.database, selectedDatabase?.container);
+                await cosmosDbDocumentService.ChangeContainerAsync(selectedDatabase?.Database, selectedDatabase?.Container);
                 
                 (var result, int count) = (await cosmosDbDocumentService.QueryAsync(query, 100));
                 selectedDocument = null;
@@ -206,6 +207,8 @@ namespace CosmosExplorer.Avalonia.ViewModels
             stateContainer.ConnectionString = selectedConnectionString.ConnectionString;
 
             SetSelectedConnectionString();
+            Documents.Clear();
+            FullDocuments.Clear();
 
             await userSettingsService.SaveSettingsAsync(stateContainer);
             await ReloadAsync();

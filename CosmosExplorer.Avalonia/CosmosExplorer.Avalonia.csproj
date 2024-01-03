@@ -53,14 +53,10 @@
 
 
     <ItemGroup>
-      <Folder Include="Models\" />
-    </ItemGroup>
-
-
-    <ItemGroup>
         <Content Include="Assets\favicon.ico">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
         <Folder Include="Assets\*" />
+        <Folder Include="Models\" />
     </ItemGroup>
 </Project>

@@ -25,6 +25,12 @@
         </ResourceDictionary>
     </Window.Resources>
     <Window.Styles>
+        <Style Selector="TextBox">
+            <Setter Property="SelectionBrush"  Value="Gainsboro" />
+        </Style>
+        <Style Selector="SelectableTextBlock">
+            <Setter Property="SelectionBrush"  Value="Gainsboro" />
+        </Style>
         <Style Selector="DataGridCell:selected">
             <Setter Property="Background" Value="LightSteelBlue" />
 
@@ -48,9 +54,10 @@
     <TabControl>
         <TabItem Header="Cosmos Explorer" FontSize="16">
             <Grid RowDefinitions="3*,3, 7*" ColumnDefinitions="4*,3,6*">
+                
                 <ListBox Grid.Column="0" Grid.Row="0" x:Name="databases"
                          ItemsSource="{Binding Databases}"
-                         SelectedItem="{Binding SelectedDatabase}">
+                         SelectedItem="{Binding SelectedDatabase}" Margin="5" BorderThickness="1" CornerRadius="3" Padding="2">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <Border BorderThickness="1"
@@ -62,7 +69,7 @@
                 </ListBox>
                 <ListBox Grid.Column="0" Grid.Row="2" x:Name="documents"
                          ItemsSource="{Binding Documents}"
-                         SelectedItem="{Binding SelectedDocument}">
+                         SelectedItem="{Binding SelectedDocument}" Margin="5" BorderThickness="1" CornerRadius="3" Padding="2">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <Border BorderThickness="1"
@@ -99,18 +106,21 @@
         <TabItem Header="Connections" FontSize="16">
             <StackPanel DataContext="{Binding }" Spacing="10">
 
-                <DataGrid Margin="20" ItemsSource="{Binding ConnectionStrings}"
+                <DataGrid Margin="20" ItemsSource="{Binding ConnectionStrings}"  
                           SelectedItem="{Binding SelectedConnectionString}"
                           AutoGenerateColumns="True" IsReadOnly="True"
-                          GridLinesVisibility="All"
+                          GridLinesVisibility="All" 
                           BorderThickness="1" BorderBrush="Gray">
                 </DataGrid>
 
-                <TextBox Text="{Binding ConnectionStringName}" Watermark="Connection string name" />
+                <StackPanel DataContext="{Binding }" Margin="18">
 
-                <TextBox Text="{Binding ConnectionString}" Watermark="Connection string" />
-                <Button Command="{Binding SaveSettingsAsyncCommand}"
+                <TextBox Text="{Binding ConnectionStringName}" Watermark="Connection string name" Margin="5" />
+
+                <TextBox Text="{Binding ConnectionString}" Watermark="Connection string" Margin="5"/>
+                <Button Command="{Binding SaveSettingsAsyncCommand}" Margin="5"
                         Content="Add" />
+                </StackPanel>
             </StackPanel>
         </TabItem>
     </TabControl>
