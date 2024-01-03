@@ -82,7 +82,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: CosmosExplorer.Avalonia/bin/Release/net6.0/win-x64/publish/LiteCosmosExplorer_win-x64.zip
+          asset_path: CosmosExplorer.Avalonia/bin/Release/net8.0/win-x64/publish/LiteCosmosExplorer_win-x64.zip
           asset_name: LiteCosmosExplorer_win-x64.zip
           asset_content_type: application/zip
       # Upload linux-x64
@@ -92,6 +92,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: CosmosExplorer.Avalonia/bin/Release/net6.0/linux-x64/publish/LiteCosmosExplorer_linux-x64.zip
+          asset_path: CosmosExplorer.Avalonia/bin/Release/net8.0/linux-x64/publish/LiteCosmosExplorer_linux-x64.zip
           asset_name: LiteCosmosExplorer_linux-x64.zip
           asset_content_type: application/zip
