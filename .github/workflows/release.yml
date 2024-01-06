@@ -26,7 +26,7 @@ jobs:
           dotnet-version: 8.0.x
       # Publish osx-x64
       - name: Publish osx-x64
-        run: dotnet publish -r osx-x64 -p:Configuration=Release -p:DebugType=None -p:DebugSymbols=false -p:Version=${{env.releaseVersion}}  -p:PublishSingleFile=true
+        run: (cd CosmosExplorer.Avalonia; dotnet publish -r osx-x64 -p:Configuration=Release -p:DebugType=None -p:DebugSymbols=false -p:Version=${{env.releaseVersion}}  -p:PublishSingleFile=true)
       - name: Zip osx-x64
         run: (cd CosmosExplorer.Avalonia/bin/Release/net8.0/osx-x64/publish ; zip -r LiteCosmosExplorer_osx-x64.zip *)
       # Publish osx-arm64
