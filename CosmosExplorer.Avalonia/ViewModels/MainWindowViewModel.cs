@@ -26,12 +26,23 @@ namespace CosmosExplorer.Avalonia.ViewModels
 
         public ObservableCollection<string> FullDocuments { get; } = [];
         public ObservableCollection<(string, string)> Documents { get; set; } = [];
-        public ObservableCollection<DatabaseViewModel> Databases { get; set; } = [];
-
-
-        public ObservableCollection<PreferenceConnectionString> ConnectionStrings { get; set; } = [];
+        public ObservableCollection<DatabaseViewModel> Databases { get; set; } = []; public ObservableCollection<PreferenceConnectionString> ConnectionStrings { get; set; } = [];
         public ObservableCollection<string> LastQueries { get; set; } = [];
 
+        private bool isBusy;
+        private string errorMessage;
+        public bool IsBusy
+        {
+            get => isBusy;
+            set => this.RaiseAndSetIfChanged(ref isBusy, value);
+        }
+        
+        public string ErrorMessage
+        {
+            get => errorMessage;
+            set => this.RaiseAndSetIfChanged(ref errorMessage, value);
+        }
+        
         private string? connectionString;
         public string? ConnectionString
         {
@@ -95,6 +106,7 @@ namespace CosmosExplorer.Avalonia.ViewModels
             }
         }
         
+        
         public MainWindowViewModel(IUserSettingsService userSettingsService, ICosmosDBDocumentService cosmosDbDocumentService,IStateContainer stateContainer )
         {
             this.userSettingsService = userSettingsService ?? throw new ArgumentNullException(nameof(userSettingsService));
@@ -108,7 +120,6 @@ namespace CosmosExplorer.Avalonia.ViewModels
             ChangeConnectionStringCommand = ReactiveCommand.CreateFromTask(ChangeConnectionStringAsync); 
             ReLoadAsyncCommand = ReactiveCommand.CreateFromTask(ReloadAsync); 
             LoadSettingsAsyncCommand.Execute(null);
-            
         }
 
         private async Task LoadSettingsAsync()
@@ -159,6 +170,8 @@ namespace CosmosExplorer.Avalonia.ViewModels
         
         private async Task QueryAsync()
         {
+            IsBusy = true;
+            ErrorMessage = "";
             try
             {
                 await cosmosDbDocumentService.ChangeContainerAsync(selectedDatabase?.Database, selectedDatabase?.Container);
@@ -173,10 +186,14 @@ namespace CosmosExplorer.Avalonia.ViewModels
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                ErrorMessage = e.Message;
+
             }
+            IsBusy = false;
+
         }
 
+        
         private void AddLastQuery(string query)
         {
             var list = stateContainer.LastQueries;

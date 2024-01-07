@@ -13,44 +13,6 @@
     <Design.DataContext>
         <vm:MainWindowViewModel />
     </Design.DataContext>
-
-    <Window.Resources>
-        <ResourceDictionary>
-            <SolidColorBrush x:Key="ButtonBackgroundApp" Color="{DynamicResource SystemAccentColorLight2}"
-                             Opacity=".35" />
-            <StaticResource x:Key="ButtonBackground" ResourceKey="ButtonBackgroundApp" />
-            <SolidColorBrush x:Key="BackgroundApp" Color="{DynamicResource SystemAccentColorLight2}"
-                             Opacity=".35" />
-            <StaticResource x:Key="Background" ResourceKey="BackgroundApp" />
-        </ResourceDictionary>
-    </Window.Resources>
-    <Window.Styles>
-        <Style Selector="TextBox">
-            <Setter Property="SelectionBrush"  Value="Gainsboro" />
-        </Style>
-        <Style Selector="SelectableTextBlock">
-            <Setter Property="SelectionBrush"  Value="Gainsboro" />
-        </Style>
-        <Style Selector="DataGridCell:selected">
-            <Setter Property="Background" Value="LightSteelBlue" />
-
-        </Style>
-        <Style Selector="DataGridCell:focus">
-            <Setter Property="Background" Value="LightSteelBlue" />
-        </Style>
-        <Style Selector="DataGridCell:editing">
-            <Setter Property="Background" Value="LightSteelBlue" />
-        </Style>
-        <Style Selector="DataGridRow:selected">
-            <Setter Property="Background" Value="LightSteelBlue" />
-        </Style>
-        <Style Selector="DataGridRow:focus">
-            <Setter Property="Background" Value="LightSteelBlue" />
-        </Style>
-        <Style Selector="DataGridRow:editing">
-            <Setter Property="Background" Value="LightSteelBlue" />
-        </Style>
-    </Window.Styles>
     <TabControl>
         <TabItem Header="Cosmos Explorer" FontSize="16">
             <Grid RowDefinitions="3*,3, 7*" ColumnDefinitions="4*,3,6*">
@@ -86,11 +48,22 @@
 
                     <Button Command="{Binding QueryAsyncCommand}"
                             Content="Query" />
-
+                    <TextBox Background="Transparent" Foreground="#990000"
+                             BorderThickness="0"
+                             Text="{Binding ErrorMessage}"
+                             IsReadOnly="True"
+                             TextWrapping="Wrap" />
+                    <ProgressBar Height="20" Width="20" 
+                                 IsIndeterminate="{Binding IsBusy}"
+                                 IsVisible="{Binding IsBusy}"
+                                 Foreground="LightBlue"
+                                 ShowProgressText="False" VerticalAlignment="Top"
+                                 Margin="0 5" />
                 </StackPanel>
 
                
-                <Border Grid.Column="2" Grid.Row="3"
+                
+                <Border Grid.Column="2" Grid.Row="2"
                         CornerRadius="4" Margin="5"
                         BorderThickness="1" BorderBrush="{DynamicResource SystemBaseMediumColor}">
 
