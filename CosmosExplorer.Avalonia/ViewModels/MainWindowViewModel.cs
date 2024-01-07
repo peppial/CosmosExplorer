@@ -135,6 +135,9 @@ namespace CosmosExplorer.Avalonia.ViewModels
 
         private async Task ReloadAsync()
         {
+            IsBusy = true;
+            ErrorMessage = "";
+
             Databases.Clear();
             try
             {
@@ -153,8 +156,10 @@ namespace CosmosExplorer.Avalonia.ViewModels
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                ErrorMessage = e.Message;
+
             }
+            IsBusy = false;
 
             
         }
