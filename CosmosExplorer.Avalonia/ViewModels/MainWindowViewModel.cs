@@ -16,97 +16,30 @@ namespace CosmosExplorer.Avalonia.ViewModels
         private readonly IUserSettingsService userSettingsService;
         private readonly ICosmosDBDocumentService cosmosDbDocumentService;
         private IStateContainer stateContainer;
+        
+        private bool isBusy;
+        private string errorMessage;
+        private string? connectionString;
+        private DocumentViewModel? selectedDocument;
+        private DatabaseViewModel? selectedDatabase;
+        private string? query;
+        private PreferenceConnectionString selectedConnectionString;
+        private string? connectionStringName;
+        private string fullDocument;
+        private int selectedTabIndex;
+        private bool addConnectionString;
         public ICommand LoadSettingsAsyncCommand { get; }
         public ICommand SaveSettingsAsyncCommand { get; }
         public ICommand QueryAsyncCommand { get; }
         public ICommand GetDocumentAsyncCommand { get; }
         public ICommand ChangeConnectionStringCommand { get; }
         public ICommand ReLoadAsyncCommand { get; }
-
-
-        public ObservableCollection<string> FullDocuments { get; } = [];
-        public ObservableCollection<(string, string)> Documents { get; set; } = [];
-        public ObservableCollection<DatabaseViewModel> Databases { get; set; } = []; public ObservableCollection<PreferenceConnectionString> ConnectionStrings { get; set; } = [];
+        
+        public ObservableCollection<DocumentViewModel> Documents { get; set; } = [];
+        public ObservableCollection<DatabaseViewModel> Databases { get; set; } = []; 
+        public ObservableCollection<PreferenceConnectionString> ConnectionStrings { get; set; } = [];
         public ObservableCollection<string> LastQueries { get; set; } = [];
 
-        private bool isBusy;
-        private string errorMessage;
-        public bool IsBusy
-        {
-            get => isBusy;
-            set => this.RaiseAndSetIfChanged(ref isBusy, value);
-        }
-        
-        public string ErrorMessage
-        {
-            get => errorMessage;
-            set => this.RaiseAndSetIfChanged(ref errorMessage, value);
-        }
-        
-        private string? connectionString;
-        public string? ConnectionString
-        {
-            get => connectionString;
-            set => this.RaiseAndSetIfChanged(ref connectionString, value);
-        }
-        
-        private string? connectionStringName;
-        public string? ConnectionStringName
-        {
-            get => connectionStringName;
-            set => this.RaiseAndSetIfChanged(ref connectionStringName, value);
-        }
-        
-        private string? query;
-        public string? Query
-        {
-            get => query;
-            set => this.RaiseAndSetIfChanged(ref query, value);
-        }
-        
-       
-        private (string,string)? selectedDocument;
-        public (string,string)? SelectedDocument
-        {
-            get { return selectedDocument; }
-            set
-            {
-                if (selectedDocument == value)
-                    return;
-                selectedDocument = value;
-                
-                GetDocumentAsyncCommand.Execute(null);
-            }
-        }
-        
-        private DatabaseViewModel? selectedDatabase;
-        public DatabaseViewModel? SelectedDatabase
-        {
-            get { return selectedDatabase; }
-            set
-            {
-                if (selectedDatabase == value)
-                    return;
-                selectedDatabase = value;
-                Documents.Clear();
-                FullDocuments.Clear();
-            }
-        }
-        
-        private PreferenceConnectionString selectedConnectionString;
-        public PreferenceConnectionString SelectedConnectionString
-        {
-            get { return selectedConnectionString; }
-            set
-            {
-                if (selectedConnectionString == value || value is null)
-                    return;
-                selectedConnectionString = value;
-                ChangeConnectionStringCommand.Execute(null);
-            }
-        }
-        
-        
         public MainWindowViewModel(IUserSettingsService userSettingsService, ICosmosDBDocumentService cosmosDbDocumentService,IStateContainer stateContainer )
         {
             this.userSettingsService = userSettingsService ?? throw new ArgumentNullException(nameof(userSettingsService));
@@ -121,12 +54,96 @@ namespace CosmosExplorer.Avalonia.ViewModels
             ReLoadAsyncCommand = ReactiveCommand.CreateFromTask(ReloadAsync); 
             LoadSettingsAsyncCommand.Execute(null);
         }
-
+        public bool IsBusy
+        {
+            get => isBusy;
+            set => this.RaiseAndSetIfChanged(ref isBusy, value);
+        }
+        
+        public string ErrorMessage
+        {
+            get => errorMessage;
+            set => this.RaiseAndSetIfChanged(ref errorMessage, value);
+        }
+        public string? ConnectionString
+        {
+            get => connectionString;
+            set => this.RaiseAndSetIfChanged(ref connectionString, value);
+        }
+        
+        public string? ConnectionStringName
+        {
+            get => connectionStringName;
+            set => this.RaiseAndSetIfChanged(ref connectionStringName, value);
+        }
+        public string? FullDocument
+        {
+            get => fullDocument;
+            set => this.RaiseAndSetIfChanged(ref fullDocument, value);
+        }
+        
+        public string? Query
+        {
+            get => query;
+            set => this.RaiseAndSetIfChanged(ref query, value);
+        }
+        public DocumentViewModel? SelectedDocument
+        {
+            get => selectedDocument;
+            set
+            {
+                if (selectedDocument == value)
+                    return;
+                selectedDocument = value;
+                
+                GetDocumentAsyncCommand.Execute(null);
+            }
+        }
+        public DatabaseViewModel? SelectedDatabase
+        {
+            get => selectedDatabase;
+            set
+            {
+                if (selectedDatabase == value)
+                    return;
+                selectedDatabase = value;
+                Documents.Clear();
+                FullDocument = "";
+                ReloadLastQueries();
+                this.RaiseAndSetIfChanged(ref selectedDatabase, value);
+            }
+        }
+        public PreferenceConnectionString SelectedConnectionString
+        {
+            get => selectedConnectionString;
+            set
+            {
+                if (selectedConnectionString == value || value is null)
+                    return;
+                selectedConnectionString = value;
+                ChangeConnectionStringCommand.Execute(null);
+            }
+        }
+        public int SelectedTabIndex
+        {
+            get => selectedTabIndex;
+            set => this.RaiseAndSetIfChanged(ref selectedTabIndex, value);
+        }
+        public bool AddConnectionString
+        {
+            get => addConnectionString;
+            set => this.RaiseAndSetIfChanged(ref addConnectionString, value);
+        }
+        
         private async Task LoadSettingsAsync()
         {
             var loaded = await userSettingsService.GetSettingsAsync();
             stateContainer.ConnectionStrings = loaded.ConnectionStrings;
             stateContainer.ConnectionString = loaded.ConnectionString;
+            AddConnectionString = string.IsNullOrEmpty(stateContainer.ConnectionString);
+            if(AddConnectionString) SelectedTabIndex = 1;
+            
+            stateContainer.LastQueries = loaded.LastQueries;
             SelectedConnectionString = loaded.ConnectionStrings.FirstOrDefault(c => c.Selected);
 
             ConnectionStrings = new (this.stateContainer.ConnectionStrings);
@@ -142,8 +159,7 @@ namespace CosmosExplorer.Avalonia.ViewModels
             try
             {
                 var databases = await cosmosDbDocumentService.GetDatabasesAsync();
-                SelectedDatabase = null;
-
+             
                 foreach (var database in databases.OrderBy(x => x.Id))
                 {
 
@@ -152,7 +168,8 @@ namespace CosmosExplorer.Avalonia.ViewModels
                         Databases.Add((database.Id, container.Id));
                     }
                 }
-                SelectedDatabase = Databases[0];
+                if(Databases.Count>0) SelectedDatabase = Databases[0];
+                ReloadLastQueries();
             }
             catch (Exception e)
             {
@@ -166,11 +183,15 @@ namespace CosmosExplorer.Avalonia.ViewModels
 
         private async Task SaveSettingsAsync()
         {
-            var addConnectionString = new PreferenceConnectionString(connectionStringName, connectionString, true);
-            stateContainer.ConnectionStrings.Add(addConnectionString);
+            var addedConnectionString = new PreferenceConnectionString(connectionStringName, connectionString, true);
+            stateContainer.ConnectionStrings.Add(addedConnectionString);
             await userSettingsService.SaveSettingsAsync(stateContainer);
-            ConnectionStrings.Add(addConnectionString);
-            connectionStringName = connectionString = "";
+            ConnectionStrings.Add(addedConnectionString);
+            ConnectionStringName = ConnectionString = "";
+            SelectedConnectionString = addedConnectionString;
+
+            SelectedTabIndex = 0;
+            AddConnectionString = false;
         }
         
         private async Task QueryAsync()
@@ -184,7 +205,7 @@ namespace CosmosExplorer.Avalonia.ViewModels
                 (var result, int count) = (await cosmosDbDocumentService.QueryAsync(query, 100));
                 selectedDocument = null;
                 Documents.Clear();
-                Documents.AddRange(result.ToArray());
+                Documents.AddRange(result.Select(x => new DocumentViewModel(x.Item1, x.Item2)));
                 AddLastQuery(query);
                 await userSettingsService.SaveSettingsAsync(stateContainer);
                 
@@ -201,25 +222,24 @@ namespace CosmosExplorer.Avalonia.ViewModels
         
         private void AddLastQuery(string query)
         {
+            if (string.IsNullOrEmpty(query)) return;
             var list = stateContainer.LastQueries;
             if (list.Count > 0 && list[0].Query == query) return;
             var item = new LastQuery(query,stateContainer.ConnectionString, stateContainer.Database, stateContainer.Container);
+            var itemToRemove = list.FirstOrDefault(q => q.Query == query && q.Database == stateContainer.Database
+                                                                 && q.Container == stateContainer.Container &&
+                                                                 q.ConnectionString == stateContainer.ConnectionString);
+            if (itemToRemove is not null) list.Remove(itemToRemove);
+            
             list.Insert(0, item);
             if (list.Count > 10) list.RemoveAt(10);
             stateContainer.LastQueries = list;
-            LastQueries.Clear();
-            LastQueries.Add(stateContainer.LastQueries.Where(c =>
-                c.Database == stateContainer.Database
-                && c.Container == stateContainer.Container
-                && c.ConnectionString == stateContainer.ConnectionString
-            ).Select(x => x.Query).ToArray());
+            ReloadLastQueries();
         }
 
         private async Task GetDocumentAsync()
         {
-            var doc = await cosmosDbDocumentService.GetDocumentAsync(selectedDocument?.Item1,selectedDocument?.Item2);
-            FullDocuments.Clear();
-            FullDocuments.Add(doc);
+            FullDocument = await cosmosDbDocumentService.GetDocumentAsync(selectedDocument?.Id,selectedDocument?.Partition);
         }
 
         private async Task ChangeConnectionStringAsync()
@@ -230,7 +250,7 @@ namespace CosmosExplorer.Avalonia.ViewModels
 
             SetSelectedConnectionString();
             Documents.Clear();
-            FullDocuments.Clear();
+            FullDocument = "";
 
             await userSettingsService.SaveSettingsAsync(stateContainer);
             await ReloadAsync();
@@ -246,6 +266,17 @@ namespace CosmosExplorer.Avalonia.ViewModels
                     selectedConnectionString.ConnectionString==stateContainer.ConnectionStrings[i].ConnectionString
                 };
             }
+        }
+
+        private void ReloadLastQueries()
+        {
+            if(selectedDatabase is null) return;
+            LastQueries.Clear();
+            LastQueries.Add(stateContainer.LastQueries.Where(c =>
+                c.Database == selectedDatabase.Database
+                && c.Container == selectedDatabase.Container
+                && c.ConnectionString == SelectedConnectionString.ConnectionString
+            ).Select(x => x.Query).ToArray()); 
         }
     }
 }

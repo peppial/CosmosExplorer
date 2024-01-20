@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:drawing="clr-namespace:System.Drawing;assembly=System.Drawing.Primitives"
+        xmlns:AvaloniaEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="CosmosExplorer.Avalonia.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
@@ -13,13 +14,14 @@
     <Design.DataContext>
         <vm:MainWindowViewModel />
     </Design.DataContext>
-    <TabControl>
+    <TabControl SelectedIndex="{Binding SelectedTabIndex}">
         <TabItem Header="Cosmos Explorer" FontSize="16">
             <Grid RowDefinitions="3*,3, 7*" ColumnDefinitions="4*,3,6*">
-                
+
                 <ListBox Grid.Column="0" Grid.Row="0" x:Name="databases"
                          ItemsSource="{Binding Databases}"
-                         SelectedItem="{Binding SelectedDatabase}" Margin="5" BorderThickness="1" CornerRadius="3" Padding="2">
+                         SelectedItem="{Binding SelectedDatabase}" Margin="5" BorderThickness="1" CornerRadius="3"
+                         Padding="2">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <Border BorderThickness="1"
@@ -29,9 +31,15 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-                <ListBox Grid.Column="0" Grid.Row="2" x:Name="documents"
+                
+                <StackPanel Grid.Column="0" Grid.Row="2" Orientation="Vertical">
+                <Label BorderBrush="Gray" Padding="2"
+                       Content="Id / partition">
+                </Label>
+                <ListBox  x:Name="documents" 
                          ItemsSource="{Binding Documents}"
-                         SelectedItem="{Binding SelectedDocument}" Margin="5" BorderThickness="1" CornerRadius="3" Padding="2">
+                         SelectedItem="{Binding SelectedDocument}" Margin="5" BorderThickness="1" CornerRadius="3"
+                         Padding="2">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <Border BorderThickness="1"
@@ -41,6 +49,7 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
+                </StackPanel>
                 <StackPanel Grid.Column="2" Grid.Row="0"
                             Spacing="5" Margin="5">
                     <AutoCompleteBox x:Name="query" ItemsSource="{Binding LastQueries}" Text="{Binding Query}"
@@ -53,7 +62,7 @@
                              Text="{Binding ErrorMessage}"
                              IsReadOnly="True"
                              TextWrapping="Wrap" />
-                    <ProgressBar Height="20" Width="20" 
+                    <ProgressBar Height="20" Width="20"
                                  IsIndeterminate="{Binding IsBusy}"
                                  IsVisible="{Binding IsBusy}"
                                  Foreground="LightBlue"
@@ -61,17 +70,17 @@
                                  Margin="0 5" />
                 </StackPanel>
 
-               
-                
+
                 <Border Grid.Column="2" Grid.Row="2"
                         CornerRadius="4" Margin="5"
                         BorderThickness="1" BorderBrush="{DynamicResource SystemBaseMediumColor}">
 
                     <Grid ColumnDefinitions="*,Auto">
+                        <!--<AvaloniaEdit:TextEditor Text=""
+                                                 ShowLineNumbers="True" />-->
                         <ScrollViewer>
-                            <SelectableTextBlock Text="{Binding FullDocuments[0]}" />
+                            <SelectableTextBlock Text="{Binding FullDocument}" />
                         </ScrollViewer>
-
                     </Grid>
                 </Border>
             </Grid>
@@ -79,21 +88,29 @@
         <TabItem Header="Connections" FontSize="16">
             <StackPanel DataContext="{Binding }" Spacing="10">
 
-                <DataGrid Margin="20" ItemsSource="{Binding ConnectionStrings}"  
-                          SelectedItem="{Binding SelectedConnectionString}"
-                          AutoGenerateColumns="True" IsReadOnly="True"
-                          GridLinesVisibility="All" 
+                <DataGrid Margin="20" ItemsSource="{Binding ConnectionStrings}"
+                          SelectedItem="{Binding SelectedConnectionString}" IsVisible="{Binding !AddConnectionString}"
+                          IsReadOnly="True"
+                          GridLinesVisibility="All"
                           BorderThickness="1" BorderBrush="Gray">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+                        <DataGridTextColumn Header="Connection String" Binding="{Binding ConnectionString}" />
+                    </DataGrid.Columns>
                 </DataGrid>
+                <Grid RowDefinitions="Auto" ColumnDefinitions="5*, 5*">
 
-                <StackPanel DataContext="{Binding }" Margin="18">
+                    <StackPanel DataContext="{Binding }" Margin="18">
+                        <Label Foreground="SeaGreen" IsVisible="{Binding AddConnectionString}"
+                               Content="Start by adding a connection string">
+                        </Label>
+                        <TextBox Text="{Binding ConnectionStringName}" Watermark="Connection string name" Margin="5" />
 
-                <TextBox Text="{Binding ConnectionStringName}" Watermark="Connection string name" Margin="5" />
-
-                <TextBox Text="{Binding ConnectionString}" Watermark="Connection string" Margin="5"/>
-                <Button Command="{Binding SaveSettingsAsyncCommand}" Margin="5"
-                        Content="Add" />
-                </StackPanel>
+                        <TextBox Text="{Binding ConnectionString}" Watermark="Connection string" Margin="5" />
+                        <Button Command="{Binding SaveSettingsAsyncCommand}" Margin="5"
+                                Content="Add Connection String" />
+                    </StackPanel>
+                </Grid>
             </StackPanel>
         </TabItem>
     </TabControl>
