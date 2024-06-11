@@ -17,17 +17,7 @@ namespace CosmosExplorer.Infrastructure.Command
         {
             this.connectionService = connectionService ?? throw new ArgumentNullException(nameof(connectionService));
         }
-
-        public async Task DeleteDocumentAsync(string id, string partitionKey)
-        {
-            if (connectionService.container is null) throw new ArgumentException(nameof(connectionService.container));
-
-            Container container = connectionService.container;
-          
-            await container.DeleteItemAsync<dynamic>(id, new PartitionKey(partitionKey));
-         }
-
-        public async Task UpdateDocumentAsync(string id, string partitionKey, string documentString)
+        public async Task UpdateDocumentAsync(string id, Partition partition, string documentString)
         {
             if (connectionService.container is null) throw new ArgumentException(nameof(connectionService.container));
 
@@ -39,9 +29,17 @@ namespace CosmosExplorer.Infrastructure.Command
             }
             else
             {
-                await container.ReplaceItemAsync(JsonConvert.DeserializeObject<dynamic>(documentString), id, new PartitionKey(partitionKey));
+                await container.ReplaceItemAsync(JsonConvert.DeserializeObject<dynamic>(documentString), id, CosmosExtensions.GetPartitionKey(partition));
             }
-           
+        }
+        
+        public async Task DeleteDocumentAsync(string id, Partition partition)
+        {
+            if (connectionService.container is null) throw new ArgumentException(nameof(connectionService.container));
+
+            Container container = connectionService.container;
+          
+            await container.DeleteItemAsync<dynamic>(id, CosmosExtensions.GetPartitionKey(partition));
         }
     }
 }

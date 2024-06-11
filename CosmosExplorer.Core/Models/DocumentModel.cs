@@ -12,8 +12,12 @@ namespace CosmosExplorer.Core.Models
         string? SelfLink { get; }
         string? Attachments { get; }
         long TimeStamp { get; }
-        string? PartitionKey { get; }
+        string? PartitionKey1 { get; }
+        string? PartitionKey2 { get; }
+        string? PartitionKey3 { get; }
         bool HasPartitionKey { get; }
+
+        Partition Partition => new Partition(PartitionKey1, PartitionKey2, PartitionKey3);
     }
 
     public class DocumentModel : IDocumentModel
@@ -57,8 +61,14 @@ namespace CosmosExplorer.Core.Models
         [JsonProperty("_ts")]
         public long TimeStamp { get; set; }
 
-        [JsonProperty("_partitionKey")]
-        public string? PartitionKey { get; set; }
+        [JsonProperty("_partitionKey1")]
+        public string? PartitionKey1 { get; set; }
+        
+        [JsonProperty("_partitionKey2")]
+        public string? PartitionKey2 { get; set; }
+        
+        [JsonProperty("_partitionKey3")]
+        public string? PartitionKey3 { get; set; }
 
         [JsonProperty("_hasPartitionKey")]
         public bool HasPartitionKey { get; set; }
@@ -72,12 +82,14 @@ namespace CosmosExplorer.Core.Models
         {
             return other != null
                     && Id == other.Id
-                    && PartitionKey == other.PartitionKey;
+                    && PartitionKey1 == other.PartitionKey1
+                    && PartitionKey2 == other.PartitionKey2
+                    && PartitionKey3 == other.PartitionKey3;
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Id, SelfLink, PartitionKey);
+            return HashCode.Combine(Id, SelfLink, PartitionKey1, PartitionKey2, PartitionKey3);
         }
     }
 }

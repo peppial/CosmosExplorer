@@ -5,10 +5,9 @@ namespace CosmosExplorer.Core.Query
 {
 	public interface IQueryService
 	{
-        Task<string> GetDocumentAsync(string partitionName, string id);
-        Task<QueryResultModel<IReadOnlyCollection<IDocumentModel>>> QueryAsync(string partitionName, string filter, int maxItems, CancellationToken cancellationToken);
+        Task<string> GetDocumentAsync(Partition partition, string id);
+        Task<QueryResultModel<IReadOnlyCollection<IDocumentModel>>> QueryAsync(string filter, int maxItems, CancellationToken cancellationToken);
 
-
-    }
+	}
 }
 

@@ -15,27 +15,47 @@ namespace CosmosExplorer.Infrastructure.Query
             this.connectionService = connectionService ?? throw new ArgumentNullException(nameof(connectionService));
         }
 
-        public async Task<string> GetDocumentAsync(string partitionName, string id)
+        public async Task<string> GetDocumentAsync(Partition partition, string id)
         {
-
             if (id is null) return null;
-            var response = await connectionService.container.ReadItemAsync<dynamic>(id, new PartitionKey(partitionName));
+
+            PartitionKey key;
+            if (connectionService.containerProperties.PartitionKeyPaths.Count > 1)
+            {
+                key = CosmosExtensions.GetPartitionKey(partition);
+            }
+            else
+            {
+                key = CosmosExtensions.GetPartitionKey(partition.PartitionName1);
+            }
+            var response = await connectionService.container.ReadItemAsync<dynamic>(id, key);
 
             return response.Resource.ToString();
         }
-        public async Task<QueryResultModel<IReadOnlyCollection<IDocumentModel>>> QueryAsync(string partitionName, string filter, int maxItems, CancellationToken cancellationToken)
+        public async Task<QueryResultModel<IReadOnlyCollection<IDocumentModel>>> QueryAsync(string filter, int maxItems, CancellationToken cancellationToken)
         {
             filter = filter.RemoveSpecialCharacters();
             var result = new QueryResultModel<IReadOnlyCollection<IDocumentModel>>();
             var containerProperties = await connectionService.container.ReadContainerAsync(null, cancellationToken);
 
-            var token = containerProperties.Resource.PartitionKeyPath;
-            if (token != null)
+            string token = null;
+            if (containerProperties.Resource.PartitionKeyPaths.Count > 1)
             {
-                token = $", c{token.Replace('/', '.')} as _partitionKey, true as _hasPartitionKey";
+                
+                string[] paths = containerProperties.Resource.PartitionKeyPaths.Select(x => x.Substring(1)).ToArray();
+                int index = 1;
+                foreach (string key in paths)
+                {
+                    token += $", c.{key} as _partitionKey{index++}";
+                }
+                token += ", true as _hasPartitionKey";
             }
-
-
+            else if(containerProperties.Resource.PartitionKeyPath is not null)
+            {
+                token = containerProperties.Resource.PartitionKeyPath.Replace('/', '.');
+                token = $", c{token} as _partitionKey1, true as _hasPartitionKey";
+            }
+            
             var sql = $"SELECT c.id, c._self, c._etag, c._ts, c._attachments {token} FROM c {filter}";
 
             var options = new QueryRequestOptions
@@ -60,6 +80,7 @@ namespace CosmosExplorer.Infrastructure.Query
 
             return result;
         }
+        
     }
 }
 

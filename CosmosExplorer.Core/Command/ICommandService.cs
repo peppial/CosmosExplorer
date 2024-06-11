@@ -4,9 +4,9 @@ namespace CosmosExplorer.Core.Command
 {
 	public interface ICommandService
 	{
-        Task UpdateDocumentAsync(string id, string partitionKey, string documentString);
+        Task UpdateDocumentAsync(string id, Partition partition, string documentString);
 
-        Task DeleteDocumentAsync(string id, string partitionKey);
+        Task DeleteDocumentAsync(string id, Partition partition);
 
     }
 }

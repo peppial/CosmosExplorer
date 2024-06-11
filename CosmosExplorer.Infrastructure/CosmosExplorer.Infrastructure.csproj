@@ -17,7 +17,6 @@
     <Folder Include="Query\" />
     <Folder Include="Command\" />
     <Folder Include="Connection\" />
-    <Folder Include="Extensions\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CosmosExplorer.Core\CosmosExplorer.Core.csproj" />

@@ -19,10 +19,11 @@ namespace CosmosExplorer.Avalonia.ViewModels
         
         private bool isBusy;
         private string errorMessage;
+        private string message;
         private string? connectionString;
         private DocumentViewModel? selectedDocument;
         private DatabaseViewModel? selectedDatabase;
-        private string? query;
+        private string? filter;
         private PreferenceConnectionString selectedConnectionString;
         private string? connectionStringName;
         private string fullDocument;
@@ -31,6 +32,11 @@ namespace CosmosExplorer.Avalonia.ViewModels
         public ICommand LoadSettingsAsyncCommand { get; }
         public ICommand SaveSettingsAsyncCommand { get; }
         public ICommand QueryAsyncCommand { get; }
+        public ICommand NewAsyncCommand { get; }
+        public ICommand SaveAsyncCommand { get; }
+
+        public ICommand DeleteAsyncCommand { get; }
+
         public ICommand GetDocumentAsyncCommand { get; }
         public ICommand ChangeConnectionStringCommand { get; }
         public ICommand ReLoadAsyncCommand { get; }
@@ -49,6 +55,9 @@ namespace CosmosExplorer.Avalonia.ViewModels
             LoadSettingsAsyncCommand = ReactiveCommand.CreateFromTask(LoadSettingsAsync);
             SaveSettingsAsyncCommand = ReactiveCommand.CreateFromTask(SaveSettingsAsync);
             QueryAsyncCommand = ReactiveCommand.CreateFromTask(QueryAsync); 
+            NewAsyncCommand = ReactiveCommand.CreateFromTask(NewAsync); 
+            SaveAsyncCommand = ReactiveCommand.CreateFromTask(SaveAsync); 
+            DeleteAsyncCommand = ReactiveCommand.CreateFromTask(DeleteAsync); 
             GetDocumentAsyncCommand = ReactiveCommand.CreateFromTask(GetDocumentAsync);
             ChangeConnectionStringCommand = ReactiveCommand.CreateFromTask(ChangeConnectionStringAsync); 
             ReLoadAsyncCommand = ReactiveCommand.CreateFromTask(ReloadAsync); 
@@ -63,8 +72,14 @@ namespace CosmosExplorer.Avalonia.ViewModels
         public string ErrorMessage
         {
             get => errorMessage;
-            set => this.RaiseAndSetIfChanged(ref errorMessage, value);
+            set=>this.RaiseAndSetIfChanged(ref errorMessage, value); 
         }
+        public string Message
+        {
+            get => message;
+            set =>this.RaiseAndSetIfChanged(ref message, value); 
+        }
+
         public string? ConnectionString
         {
             get => connectionString;
@@ -84,8 +99,8 @@ namespace CosmosExplorer.Avalonia.ViewModels
         
         public string? Query
         {
-            get => query;
-            set => this.RaiseAndSetIfChanged(ref query, value);
+            get => filter;
+            set => this.RaiseAndSetIfChanged(ref filter, value);
         }
         public DocumentViewModel? SelectedDocument
         {
@@ -198,17 +213,19 @@ namespace CosmosExplorer.Avalonia.ViewModels
         {
             IsBusy = true;
             ErrorMessage = "";
+            Message = "";
             try
             {
-                await cosmosDbDocumentService.ChangeContainerAsync(selectedDatabase?.Database, selectedDatabase?.Container);
+                await SetContainerAsync();
                 
-                (var result, int count) = (await cosmosDbDocumentService.QueryAsync(query, 100));
+                (var result, int count, double runits) = (await cosmosDbDocumentService.QueryAsync(filter, 100));
                 selectedDocument = null;
                 Documents.Clear();
                 Documents.AddRange(result.Select(x => new DocumentViewModel(x.Item1, x.Item2)));
-                AddLastQuery(query);
+                AddLastQuery(filter);
                 await userSettingsService.SaveSettingsAsync(stateContainer);
-                
+                Message = $"{count} items retrieved, {runits} RUs";
+
             }
             catch (Exception e)
             {
@@ -219,7 +236,68 @@ namespace CosmosExplorer.Avalonia.ViewModels
 
         }
 
+        private async Task SetContainerAsync()
+        {
+            await cosmosDbDocumentService.ChangeContainerAsync(selectedDatabase?.Database, selectedDatabase?.Container);
+        }
+
+        private async Task NewAsync()
+        {
+            IsBusy = true;
+            ErrorMessage = "";
+            try
+            {
+                await SetContainerAsync();
+                selectedDocument = null;
+                Documents.Clear();
+            }
+            catch (Exception e)
+            {
+                ErrorMessage = e.Message;
+
+            }
+            IsBusy = false;
+
+        }
         
+        private async Task SaveAsync()
+        {
+            IsBusy = true;
+            ErrorMessage = "";
+            Message = "";
+            try
+            {
+                await SetContainerAsync();
+                await cosmosDbDocumentService.UpdateDocumentAsync(selectedDocument.Id, selectedDocument.Partition, FullDocument);
+            }
+            catch (Exception e)
+            {
+                ErrorMessage = e.Message;
+
+            }
+            Message = "Document is updated.";
+            IsBusy = false;
+
+        }
+        private async Task DeleteAsync()
+        {
+            IsBusy = true;
+            ErrorMessage = "";
+            Message = "";
+            try
+            {
+                await SetContainerAsync();
+                await cosmosDbDocumentService.DeleteDocumentAsync(selectedDocument.Id, selectedDocument.Partition);
+            }
+            catch (Exception e)
+            {
+                ErrorMessage = e.Message;
+
+            }
+            Message = "Document is deleted.";
+            IsBusy = false;
+
+        }
         private void AddLastQuery(string query)
         {
             if (string.IsNullOrEmpty(query)) return;

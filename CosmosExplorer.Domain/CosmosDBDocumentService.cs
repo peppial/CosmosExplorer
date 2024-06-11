@@ -40,25 +40,25 @@ public class CosmosDBDocumentService : ICosmosDBDocumentService
             containerName);
     }
 
-    public async Task<(IEnumerable<(string, string)>, int)> QueryAsync(string query, int count)
+    public async Task<(IEnumerable<(string, Partition)>, int, double)> QueryAsync(string query, int count)
     {
-        var result = await queryService.QueryAsync(null, query, count, new CancellationToken());
+        var result = await queryService.QueryAsync(query, count, new CancellationToken());
 
-        return (result.Items.Select(i => (i.Id, i.PartitionKey)), result.Items.Count());
+        return (result.Items.Select(i => (i.Id, i.Partition)), result.Items.Count(), result.RequestCharge);
     }
 
-    public async Task<string> GetDocumentAsync(string id, string partitionKey)
+    public async Task<string> GetDocumentAsync(string id, Partition partition)
     {
-        return await queryService.GetDocumentAsync(partitionKey, id);
+        return await queryService.GetDocumentAsync(partition, id);
     }
 
-    public async Task UpdateDocumentAsync(string id, string partitionKey, string documentString)
+    public async Task UpdateDocumentAsync(string id, Partition partition, string documentString)
     {
-        await commandService.UpdateDocumentAsync(id, partitionKey, documentString);
+        await commandService.UpdateDocumentAsync(id, partition, documentString);
     }
 
-    public async Task DeleteDocumentAsync(string id, string partitionKey)
+    public async Task DeleteDocumentAsync(string id, Partition partition)
     {
-        await commandService.DeleteDocumentAsync(id, partitionKey);
+        await commandService.DeleteDocumentAsync(id, partition);
     }
 }
