@@ -17,4 +17,26 @@ public class CosmosExtensions
 
         return builder.Build();
     }
+    
+    public static PartitionKey GetPartitionKeyNullable(Partition partition)
+    {
+        PartitionKeyBuilder builder = new();
+
+        if (partition.PartitionName1 is not null)
+        {
+            builder.Add(partition.PartitionName1);
+        }
+
+        if (partition.PartitionName2 is not null)
+        {
+            builder.Add(partition.PartitionName2);
+        }
+
+        if (partition.PartitionName3 is not null)
+        {
+            builder.Add(partition.PartitionName3);
+        }
+
+        return builder.Build();
+    }
 }

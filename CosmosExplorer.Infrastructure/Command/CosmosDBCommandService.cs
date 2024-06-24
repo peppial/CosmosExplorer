@@ -29,7 +29,7 @@ namespace CosmosExplorer.Infrastructure.Command
             }
             else
             {
-                await container.ReplaceItemAsync(JsonConvert.DeserializeObject<dynamic>(documentString), id, CosmosExtensions.GetPartitionKey(partition));
+                await container.ReplaceItemAsync(JsonConvert.DeserializeObject<dynamic>(documentString), id, CosmosExtensions.GetPartitionKeyNullable(partition));
             }
         }
         
@@ -39,7 +39,7 @@ namespace CosmosExplorer.Infrastructure.Command
 
             Container container = connectionService.container;
           
-            await container.DeleteItemAsync<dynamic>(id, CosmosExtensions.GetPartitionKey(partition));
+            await container.DeleteItemAsync<dynamic>(id, CosmosExtensions.GetPartitionKeyNullable(partition));
         }
     }
 }
