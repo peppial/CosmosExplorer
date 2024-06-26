@@ -10,4 +10,5 @@ public interface ICosmosDBDocumentService
     Task<string> GetDocumentAsync(string id, Partition partition);
     Task UpdateDocumentAsync(string id, Partition partition, string documentString);
     Task DeleteDocumentAsync(string id, Partition partition);
+    Partition? Partition { get; }
 }

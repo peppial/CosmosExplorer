@@ -61,4 +61,6 @@ public class CosmosDBDocumentService : ICosmosDBDocumentService
     {
         await commandService.DeleteDocumentAsync(id, partition);
     }
+
+    public Partition? Partition => connectionService.Partition;
 }

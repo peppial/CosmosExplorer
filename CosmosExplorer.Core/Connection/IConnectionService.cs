@@ -12,6 +12,8 @@ public interface IConnectionService
 
     Task<string?> ChangeContainerAsync(string connectionString, string databaseName, string containerName);
     Task<IEnumerable<IDatabaseModel>> GetDatabasesAsync(string connectionString, CancellationToken cancellationToken);
+    
+    Partition? Partition { get; }
 
 }
 

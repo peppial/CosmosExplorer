@@ -2,12 +2,15 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CosmosExplorer.Core;
 using CosmosExplorer.Core.Models;
 using CosmosExplorer.Core.State;
 using DynamicData;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
 
 namespace CosmosExplorer.Avalonia.ViewModels
 {
@@ -162,7 +165,6 @@ namespace CosmosExplorer.Avalonia.ViewModels
             SelectedConnectionString = loaded.ConnectionStrings.FirstOrDefault(c => c.Selected);
 
             ConnectionStrings = new (this.stateContainer.ConnectionStrings);
-            await ReloadAsync();
         }
 
         private async Task ReloadAsync()
@@ -184,6 +186,8 @@ namespace CosmosExplorer.Avalonia.ViewModels
                     }
                 }
                 if(Databases.Count>0) SelectedDatabase = Databases[0];
+                this.RaisePropertyChanged(nameof(SelectedDatabase)); 
+                
                 ReloadLastQueries();
             }
             catch (Exception e)
@@ -248,6 +252,48 @@ namespace CosmosExplorer.Avalonia.ViewModels
             try
             {
                 await SetContainerAsync();
+                Partition partition = cosmosDbDocumentService.Partition;
+                StringBuilder newDoc =
+                    new StringBuilder(
+                        """
+                        {
+                             "id": "replace_with_new_document_id",
+                        """);
+                if (partition is not null)
+                {
+                    newDoc.Append(
+                        $"""
+                         
+                              "{partition.PartitionName1}": "replace_with_new_partition_key_value"
+                         """
+                    );
+
+                    if (partition.PartitionName2 is not null)
+                    {
+                        newDoc.Append(
+                            $"""
+                             ,
+                                  "{partition.PartitionName2}": "replace_with_new_partition_key_value"
+                             """
+                        );
+                    }
+                    
+                    if (partition.PartitionName3 is not null)
+                    {
+                        newDoc.Append(
+                            $"""
+                             ,
+                                  "{partition.PartitionName3}": "replace_with_new_partition_key_value"
+                             """
+                        );
+                    }
+                    newDoc.Append("""
+                                  
+                                  }
+                                  """);
+                }
+
+                FullDocument = newDoc.ToString();
                 selectedDocument = null;
                 Documents.Clear();
             }
@@ -256,10 +302,11 @@ namespace CosmosExplorer.Avalonia.ViewModels
                 ErrorMessage = e.Message;
 
             }
+
             IsBusy = false;
 
         }
-        
+
         private async Task SaveAsync()
         {
             IsBusy = true;
@@ -268,33 +315,47 @@ namespace CosmosExplorer.Avalonia.ViewModels
             try
             {
                 await SetContainerAsync();
-                await cosmosDbDocumentService.UpdateDocumentAsync(selectedDocument.Id, selectedDocument.Partition, FullDocument);
+                
+                await cosmosDbDocumentService.UpdateDocumentAsync(selectedDocument?.Id, selectedDocument?.Partition, FullDocument);
             }
             catch (Exception e)
             {
                 ErrorMessage = e.Message;
 
             }
-            Message = "Document is updated.";
+                
+            Message = (selectedDocument is null)?"Document is added.":"Document is updated.";
             IsBusy = false;
 
         }
         private async Task DeleteAsync()
         {
-            IsBusy = true;
+            
             ErrorMessage = "";
             Message = "";
             try
             {
-                await SetContainerAsync();
-                await cosmosDbDocumentService.DeleteDocumentAsync(selectedDocument.Id, selectedDocument.Partition);
+                //await SetContainerAsync();
+                
+                var box = MessageBoxManager
+                    .GetMessageBoxStandard("Delete?", "Are you sure you want to delete the document?",
+                        ButtonEnum.YesNo);
+
+                var result = await box.ShowAsync();
+                if (result == ButtonResult.Yes)
+                {
+                    IsBusy = true;
+                    await cosmosDbDocumentService.DeleteDocumentAsync(selectedDocument.Id, selectedDocument.Partition);
+                    await QueryAsync();
+                    Message = "Document is deleted.";
+                }
             }
             catch (Exception e)
             {
                 ErrorMessage = e.Message;
 
             }
-            Message = "Document is deleted.";
+           
             IsBusy = false;
 
         }

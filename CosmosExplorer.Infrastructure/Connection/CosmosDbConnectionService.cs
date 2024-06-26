@@ -1,6 +1,8 @@
 ﻿using CosmosExplorer.Core.Connection;
 using CosmosExplorer.Core.Models;
+using CosmosExplorer.Infrastructure.Extensions;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Serialization.HybridRow.RecordIO;
 
 namespace CosmosExplorer.Infrastructure.Connection;
 
@@ -79,6 +81,25 @@ public class CosmosDbConnectionService : IConnectionService, IDisposable
         databaseProperties.Dispose();
         return databases;
         
+    }
+
+    public Partition Partition 
+    {
+        get
+        {
+            if (containerProperties.PartitionKeyPaths.Count > 1)
+            {
+                string[] paths = containerProperties.PartitionKeyPaths.Select(x => x.Substring(1)).ToArray();
+                return new Partition(paths[0], paths.Length > 1 ? paths[1] : null, paths.Length > 2 ? paths[2] : null);
+            } 
+            
+            if (containerProperties.PartitionKeyPath is not null)
+            {
+                return new Partition(containerProperties.PartitionKeyPath.Substring(1),null, null);
+            }
+
+            return null;
+        }
     }
 
     void IDisposable.Dispose()
