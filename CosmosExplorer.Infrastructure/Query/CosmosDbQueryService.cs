@@ -36,26 +36,27 @@ namespace CosmosExplorer.Infrastructure.Query
         {
             filter = filter.RemoveSpecialCharacters();
             var result = new QueryResultModel<IReadOnlyCollection<IDocumentModel>>();
-            var containerProperties = await connectionService.container.ReadContainerAsync(null, cancellationToken);
-
+            
+            Partition partition = connectionService.Partition;
             string token = null;
-            if (containerProperties.Resource.PartitionKeyPaths.Count > 1)
+            bool hasPartition = false;
+            
+            if (partition.PartitionName1 is not null)
             {
-                
-                string[] paths = containerProperties.Resource.PartitionKeyPaths.Select(x => x.Substring(1)).ToArray();
-                int index = 1;
-                foreach (string key in paths)
-                {
-                    token += $", c.{key} as _partitionKey{index++}";
-                }
-                token += ", true as _hasPartitionKey";
+                token += $", c.{partition.PartitionName1} as _partitionKey1";
+                hasPartition = true;
             }
-            else if(containerProperties.Resource.PartitionKeyPath is not null)
+            if(partition.PartitionName2 is not null)
             {
-                token = containerProperties.Resource.PartitionKeyPath.Replace('/', '.');
-                token = $", c{token} as _partitionKey1, true as _hasPartitionKey";
+                token += $", c.{partition.PartitionName2} as _partitionKey2";
+            }
+            if(partition.PartitionName3 is not null)
+            {
+                token += $", c.{partition.PartitionName3} as _partitionKey3";
             }
             
+            if(hasPartition)  token += ", true as _hasPartitionKey";
+
             var sql = $"SELECT c.id, c._self, c._etag, c._ts, c._attachments {token} FROM c {filter}";
 
             var options = new QueryRequestOptions

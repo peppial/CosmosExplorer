@@ -8,7 +8,7 @@ public interface ICosmosDBDocumentService
     Task<string> ChangeContainerAsync(string databaseName, string containerName);
     Task<(IEnumerable<(string, Partition)>, int, double)> QueryAsync(string query, int count);
     Task<string> GetDocumentAsync(string id, Partition partition);
-    Task UpdateDocumentAsync(string id, Partition partition, string documentString);
+    Task<string> UpdateDocumentAsync(string id, Partition partition, string documentString);
     Task DeleteDocumentAsync(string id, Partition partition);
     Partition? Partition { get; }
 }

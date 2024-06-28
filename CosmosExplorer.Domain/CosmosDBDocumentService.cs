@@ -52,9 +52,9 @@ public class CosmosDBDocumentService : ICosmosDBDocumentService
         return await queryService.GetDocumentAsync(partition, id);
     }
 
-    public async Task UpdateDocumentAsync(string id, Partition partition, string documentString)
+    public async Task<string> UpdateDocumentAsync(string id, Partition partition, string documentString)
     {
-        await commandService.UpdateDocumentAsync(id, partition, documentString);
+        return await commandService.UpdateDocumentAsync(id, partition, documentString);
     }
 
     public async Task DeleteDocumentAsync(string id, Partition partition)

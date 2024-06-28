@@ -199,6 +199,7 @@
                         <DataGridTextColumn Header="Connection String" Binding="{Binding ConnectionString}" />
                     </DataGrid.Columns>
                 </DataGrid>
+              
                 <Grid RowDefinitions="Auto" ColumnDefinitions="5*, 5*">
 
                     <StackPanel DataContext="{Binding }" Margin="18">
@@ -210,6 +211,8 @@
                         <TextBox Text="{Binding ConnectionString}" Watermark="Connection string" Margin="5" />
                         <Button Command="{Binding SaveSettingsAsyncCommand}" Margin="5"
                                 Content="Add Connection String" />
+                        <Button Command="{Binding DeleteConnectionStringAsyncCommand}" Margin="5" 
+                                Content="Delete Selected Connection String" />
                     </StackPanel>
                 </Grid>
             </StackPanel>

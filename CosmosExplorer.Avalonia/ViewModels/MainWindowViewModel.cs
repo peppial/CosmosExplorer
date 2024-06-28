@@ -42,6 +42,8 @@ namespace CosmosExplorer.Avalonia.ViewModels
 
         public ICommand GetDocumentAsyncCommand { get; }
         public ICommand ChangeConnectionStringCommand { get; }
+        
+        public ICommand DeleteConnectionStringAsyncCommand { get; }
         public ICommand ReLoadAsyncCommand { get; }
         
         public ObservableCollection<DocumentViewModel> Documents { get; set; } = [];
@@ -63,6 +65,7 @@ namespace CosmosExplorer.Avalonia.ViewModels
             DeleteAsyncCommand = ReactiveCommand.CreateFromTask(DeleteAsync); 
             GetDocumentAsyncCommand = ReactiveCommand.CreateFromTask(GetDocumentAsync);
             ChangeConnectionStringCommand = ReactiveCommand.CreateFromTask(ChangeConnectionStringAsync); 
+            DeleteConnectionStringAsyncCommand = ReactiveCommand.CreateFromTask(DeleteConnectionStringAsync); 
             ReLoadAsyncCommand = ReactiveCommand.CreateFromTask(ReloadAsync); 
             LoadSettingsAsyncCommand.Execute(null);
         }
@@ -202,7 +205,7 @@ namespace CosmosExplorer.Avalonia.ViewModels
 
         private async Task SaveSettingsAsync()
         {
-            var addedConnectionString = new PreferenceConnectionString(connectionStringName, connectionString, true);
+            var addedConnectionString = new PreferenceConnectionString(connectionStringName, connectionString, true, false);
             stateContainer.ConnectionStrings.Add(addedConnectionString);
             await userSettingsService.SaveSettingsAsync(stateContainer);
             ConnectionStrings.Add(addedConnectionString);
@@ -212,7 +215,24 @@ namespace CosmosExplorer.Avalonia.ViewModels
             SelectedTabIndex = 0;
             AddConnectionString = false;
         }
-        
+
+        private async Task DeleteConnectionStringAsync()
+        {
+            var box = MessageBoxManager
+                .GetMessageBoxStandard("Delete?", "Are you sure you want to delete the connection string?",
+                    ButtonEnum.YesNo);
+
+            var result = await box.ShowAsync();
+            if (result == ButtonResult.Yes)
+            {
+                var index = stateContainer.ConnectionStrings.IndexOf(selectedConnectionString);
+                stateContainer.ConnectionStrings.RemoveAt(index);
+                await userSettingsService.SaveSettingsAsync(stateContainer);
+                ConnectionStringName = ConnectionString = "";
+                SelectedTabIndex = 0;
+                await LoadSettingsAsync();
+            }
+        }
         private async Task QueryAsync()
         {
             IsBusy = true;
@@ -316,7 +336,7 @@ namespace CosmosExplorer.Avalonia.ViewModels
             {
                 await SetContainerAsync();
                 
-                await cosmosDbDocumentService.UpdateDocumentAsync(selectedDocument?.Id, selectedDocument?.Partition, FullDocument);
+                FullDocument = await cosmosDbDocumentService.UpdateDocumentAsync(selectedDocument?.Id, selectedDocument?.Partition, FullDocument);
             }
             catch (Exception e)
             {
