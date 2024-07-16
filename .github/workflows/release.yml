@@ -97,15 +97,15 @@ jobs:
           asset_content_type: application/zip
           
       # Upload osx-arm64
-      - name: Upload osx-arm64
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: CosmosExplorer.Avalonia/bin/Release/net8.0/osx-arm64/publish/LiteCosmosExplorer_osx-arm64.zip
-          asset_name: LiteCosmosExplorer_osx-arm64.zip
-          asset_content_type: application/zip
+      #- name: Upload osx-arm64
+      #  uses: actions/upload-release-asset@v1
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #  with:
+      #    upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #    asset_path: CosmosExplorer.Avalonia/bin/Release/net8.0/osx-arm64/publish/LiteCosmosExplorer_osx-arm64.zip
+      #    asset_name: LiteCosmosExplorer_osx-arm64.zip
+      #    asset_content_type: application/zip
       # Upload win-x64
       - name: Upload win-x64
         uses: actions/upload-release-asset@v1
