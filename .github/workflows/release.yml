@@ -52,13 +52,14 @@ jobs:
       - name: Create DMG directory structure
         run: |
              mkdir -p dmg/CosmosExplorer
-             cp -R CosmosExplorer.Avalonia/bin/Release/net8.0/linux-x64/publish/* dmg/CosmosExplorer/
+             cp -R $RUNNER_TEMP/LiteCosmosExplorer.app/Contents/MacOS/* dmg/LiteCosmosExplorer/
+             #cp -R CosmosExplorer.Avalonia/bin/Release/net8.0/linux-x64/publish/* dmg/CosmosExplorer/
              
       - name: Install CreateDMG tool
         run: brew install create-dmg
         
       - name: Create DMG
-        run: create-dmg dmg/CosmosExplorer.dmg --overwrite
+        run: create-dmg dmg/LiteCosmosExplorer.dmg --overwrite
 
    
         
@@ -80,7 +81,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: /Users/runner/work/CosmosExplorer/CosmosExplorer/dmg/CosmosExplorer.dmg
+          asset_path: /Users/runner/work/CosmosExplorer/CosmosExplorer/dmg/LiteCosmosExplorer.dmg
           asset_name: CosmosExplorer.dmg
           asset_content_type: application/zip
 
