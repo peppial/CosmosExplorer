@@ -44,6 +44,24 @@ jobs:
         run: (cd CosmosExplorer.Avalonia;dotnet publish -r linux-x64 -p:Configuration=Release -p:DebugType=None -p:DebugSymbols=false -p:Version=${{env.releaseVersion}} -p:PublishSingleFile=true -p:PublishTrimmed=true -p:EnableCompressionInSingleFile=true)
       - name: Zip linux-x64
         run: (cd CosmosExplorer.Avalonia/bin/Release/net8.0/linux-x64/publish ; zip -r LiteCosmosExplorer_linux-x64 *)
+
+      - name: Create DMG directory structure
+        run: |
+             mkdir -p dmg/CosmosExplorer
+             cp -R publish/* dmg/CosmosExplorer/
+             
+      - name: Install CreateDMG tool
+        run: brew install create-dmg
+        
+      - name: Create DMG
+        run: create-dmg dmg/CosmosExplorer --overwrite
+
+      - name: Upload DMG
+        uses: actions/upload-artifact@v3
+        with:
+          name: CosmosExplorer.dmg
+          path: dmg/*.dmg
+        
       # Create release
       - name: Create Release
         id: create_release
