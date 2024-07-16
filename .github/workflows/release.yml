@@ -54,7 +54,7 @@ jobs:
         run: brew install create-dmg
         
       - name: Create DMG
-        run: create-dmg dmg/CosmosExplorer --overwrite
+        run: create-dmg dmg/CosmosExplorer.dmg --overwrite
 
       - name: Upload DMG
         uses: actions/upload-artifact@v3
