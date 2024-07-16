@@ -54,11 +54,16 @@ jobs:
              mkdir -p dmg/LiteCosmosExplorer
              cp -R $RUNNER_TEMP/LiteCosmosExplorer.app/Contents/MacOS/* dmg/LiteCosmosExplorer/
              
+      - name: Staple Release Build
+        env:
+          DMG_PATH: $RUNNER_TEMP/LiteCosmosExplorer.app/Contents/MacOS/
+        run: xcrun stapler staple /LiteCosmosExplorer.dmg
+    
       - name: Install CreateDMG tool
         run: brew install create-dmg
         
-      - name: Create DMG
-        run: create-dmg dmg/LiteCosmosExplorer.dmg --overwrite
+     # - name: Create DMG
+     #   run: create-dmg dmg/LiteCosmosExplorer.dmg --overwrite
 
    
         
