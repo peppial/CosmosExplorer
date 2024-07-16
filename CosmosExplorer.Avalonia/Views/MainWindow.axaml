@@ -62,7 +62,7 @@
                                     Content="SELECT * FROM c">
                                 </Label>
                                 <AutoCompleteBox Margin="5" x:Name="filter" ItemsSource="{Binding LastQueries}"
-                                                 Text="{Binding Query}" 
+                                                 Text="{Binding Filter}" 
                                                  FilterMode="StartsWith" Watermark="WHERE ..."   HorizontalAlignment="Stretch" />
                                 </DockPanel>
                                 <Grid>
@@ -109,8 +109,6 @@
                                     BorderThickness="1" BorderBrush="{DynamicResource SystemBaseMediumColor}">
 
                                 <Grid ColumnDefinitions="*,Auto">
-                                    <!--<AvaloniaEdit:TextEditor Text=""
-                                                 ShowLineNumbers="True" />-->
                                     <Label Grid.Column="0" BorderBrush="Gray" Padding="2"
                                            Content="Document">
                                     </Label>
@@ -127,8 +125,8 @@
                                         Spacing="5" Margin="5">
   
                                 <AutoCompleteBox Margin="5" x:Name="query" ItemsSource="{Binding LastQueries}"
-                                                 Text="{Binding Query}"
-                                                 FilterMode="StartsWith" Watermark="" />
+                                                 Text="{Binding Query}" 
+                                                 FilterMode="StartsWith" />
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"></ColumnDefinition>
@@ -137,14 +135,8 @@
                                         <ColumnDefinition Width="*"></ColumnDefinition>
                                     </Grid.ColumnDefinitions>
 
-                                    <Button Margin="5" Grid.Column="0" Command="{Binding QueryAsyncCommand}"
-                                            Content="Filter" />
-                                    <Button Margin="5" Grid.Column="1" Command="{Binding NewAsyncCommand}"
-                                            Content="New" />
-                                    <Button Margin="5" Grid.Column="2" Command="{Binding SaveAsyncCommand}"
-                                            Content="Save" />
-                                    <Button Margin="5" Grid.Column="3" Command="{Binding DeleteAsyncCommand}"
-                                            Content="Delete" />
+                                    <Button Margin="3" Grid.Column="0" Command="{Binding QueryAsyncCommand}"
+                                            Content="Execute" />
                                 </Grid>
                                 <TextBox Background="Transparent" Foreground="Green" VerticalAlignment="Top"
                                          BorderThickness="0"
@@ -167,12 +159,10 @@
 
 
                             <Border Grid.Column="0" Grid.Row="1"
-                                    CornerRadius="4" Margin="0"
+                                    CornerRadius="4" Margin="5"
                                     BorderThickness="1" BorderBrush="{DynamicResource SystemBaseMediumColor}">
 
                                 <Grid ColumnDefinitions="*,Auto">
-                                    <!--<AvaloniaEdit:TextEditor Text=""
-                                                 ShowLineNumbers="True" />-->
                                     <Label Grid.Column="0" BorderBrush="Gray" Padding="2"
                                            Content="Document">
                                     </Label>

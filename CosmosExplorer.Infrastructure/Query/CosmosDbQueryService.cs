@@ -65,20 +65,29 @@ namespace CosmosExplorer.Infrastructure.Query
                 // TODO: Handle Partition key and other IHaveRequestOptions values
                 //PartitionKey = 
             };
-
+            double requestChange = 0;
+            string continuationToken = null;
+            List<IDocumentModel> items = [];
+            
             using (var resultSet = connectionService.container.GetItemQueryIterator<DocumentModel>(
                 queryText: sql,
                 //continuationToken: continuationToken,
                 requestOptions: options))
             {
-                var response = await resultSet.ReadNextAsync(cancellationToken);
+                while (resultSet.HasMoreResults && items.Count < maxItems)
+                {
+                    var response = await resultSet.ReadNextAsync(cancellationToken);
 
-                result.RequestCharge = response.RequestCharge;
-                result.ContinuationToken = response.ContinuationToken;
-                result.Items = response.Resource.ToArray();
-                //result.Headers = response.Headers.ToDictionary();
+                    requestChange += response.RequestCharge;
+                    continuationToken = response.ContinuationToken;
+                    items.AddRange( response.Resource.ToArray());
+                    //result.Headers = response.Headers.ToDictionary();
+                }
             }
 
+            result.RequestCharge = requestChange;
+            result.ContinuationToken = continuationToken;
+            result.Items = items;
             return result;
         }
         

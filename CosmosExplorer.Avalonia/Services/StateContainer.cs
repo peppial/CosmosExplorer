@@ -4,7 +4,7 @@ using CosmosExplorer.Core;
 using CosmosExplorer.Core.Models;
 
 public class StateContainer : IStateContainer
-{
+{ 
     public string ConnectionString { get; set; }
     public List<PreferenceConnectionString> ConnectionStrings { get; set; } = [];
     public List<LastQuery> LastQueries { get; set; } = [];

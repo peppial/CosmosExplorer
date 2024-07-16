@@ -27,6 +27,7 @@ namespace CosmosExplorer.Avalonia.ViewModels
         private DocumentViewModel? selectedDocument;
         private DatabaseViewModel? selectedDatabase;
         private string? filter;
+        private string? query = "SELECT * FROM c";
         private PreferenceConnectionString selectedConnectionString;
         private string? connectionStringName;
         private string fullDocument;
@@ -102,12 +103,17 @@ namespace CosmosExplorer.Avalonia.ViewModels
             get => fullDocument;
             set => this.RaiseAndSetIfChanged(ref fullDocument, value);
         }
-        
-        public string? Query
+        public string? Filter
         {
             get => filter;
             set => this.RaiseAndSetIfChanged(ref filter, value);
         }
+        public string? Query
+        {
+            get => query;
+            set => this.RaiseAndSetIfChanged(ref query, value);
+        }
+        
         public DocumentViewModel? SelectedDocument
         {
             get => selectedDocument;
@@ -248,7 +254,7 @@ namespace CosmosExplorer.Avalonia.ViewModels
                 Documents.AddRange(result.Select(x => new DocumentViewModel(x.Item1, x.Item2)));
                 AddLastQuery(filter);
                 await userSettingsService.SaveSettingsAsync(stateContainer);
-                Message = $"{count} items retrieved, {runits} RUs";
+                Message = $"{count} items retrieved, {runits:0.##} RUs";
 
             }
             catch (Exception e)
