@@ -76,7 +76,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: CosmosExplorer.Avalonia/bin/Release/net8.0/osx-x64/publish/dmg/*.dmg
+          asset_path: /Users/runner/work/CosmosExplorer/CosmosExplorer/dmg/CosmosExplorer.dmg
           asset_name: CosmosExplorer.dmg
           asset_content_type: application/zip
 
