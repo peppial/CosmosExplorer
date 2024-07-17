@@ -1,7 +1,7 @@
 [string] $Product = "LiteCosmosExplorer"
 [string] $Target = "MacOSX64"
 
-& "$PSScriptRoot\Build.ps1" -Product $Product -Target $Target -BuildArgs "-t:BundleApp -p:RuntimeIdentifier=osx-x64 -p:PublishTrimmed=true -p:IncludeAllContentForSelfExtract=true" -ProjectPath "CosmosExplorer.Avalonia\$CosmosExplorer.Avalonia.csproj"
+& "$PSScriptRoot\Build.ps1" -Product $Product -Target $Target -BuildArgs "-t:BundleApp -p:RuntimeIdentifier=osx-x64 -p:PublishTrimmed=true -p:IncludeAllContentForSelfExtract=true" -ProjectPath "CosmosExplorer.Avalonia\CosmosExplorer.Avalonia.csproj"
 
 # Remove everything except the app bundle
 Get-Childitem "$PSScriptRoot\..\bld\$Product.$Target\" -Exclude "LiteCosmosExplorer.app" | Remove-Item -Recurse
