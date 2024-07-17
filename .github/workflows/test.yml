@@ -22,36 +22,30 @@ on:
 
 jobs:
 
-  ci_build_and_test:
-    name: CI Build and Test
+  pub_create_github_release:
+    name: Create Release
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        configuration: [Debug, Release]
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - name: Build Solution
-      run: dotnet build -v d --configuration ${{ matrix.configuration }} ${{ env.SolutionFile }}
-   
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-          tag_name: ${{ env.releaseVersion }}
-          release_name: ${{ env.releaseVersion }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ env.Product }} ${{ github.ref }}
           draft: false
-          prerelease: false
-
-  
+       
   
   pub_build_macos:
     name: Publish MacOS Build
     runs-on: macOS-latest
-    needs: ci_build_and_test
+    needs: pub_create_github_release
     strategy:
       matrix:
         target: [MacOSX64, MacOSArm64]
