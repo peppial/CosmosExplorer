@@ -22,7 +22,7 @@ if ($Clean -and (Test-Path "$OutputRoot\$TargetOutputDirectory")) {
 Write-Host "Build release..."
 try
 {
-    dotnet msbuild $BuildArgs.Split() -restore -p:Configuration=Release -p:PublishDir="$RepoRoot\$OutputRoot\$TargetOutputDirectory" "$ProjectPath"
+    dotnet msbuild $BuildArgs.Split() -restore -p:Configuration=Release -p:DebugSymbols=false -p:DebugType=None -p:PublishDir="$RepoRoot\$OutputRoot\$TargetOutputDirectory" "$ProjectPath"
     if (!$?) {
     	throw 'Build failed!'
     }
