@@ -7,7 +7,6 @@
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <LangVersion>12</LangVersion>
-<PublishTrimmed>false</PublishTrimmed>
     </PropertyGroup>
 
     <ItemGroup>
