@@ -5,7 +5,10 @@ env:
   ScriptDir: ./scripts
   Product: LiteCosmosExplorer
   Prerelease: false
-
+  
+defaults:
+  run:
+    shell: pwsh
 on:
   workflow_dispatch:
     inputs:
