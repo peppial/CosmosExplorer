@@ -3,7 +3,7 @@ param(
     [string]$Target,
     [boolean]$Clean = $True,
     [string]$BuildArgs = "",
-    [string]$ProjectPath = "CosmosExplorer.sln"
+    [string]$ProjectPath = "CosmosExplorer.Avalonia\CosmosExplorer.Avalonia.csproj"
 )
 
 [string] $RepoRoot = Resolve-Path "$PSScriptRoot\.."
