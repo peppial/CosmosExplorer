@@ -51,6 +51,7 @@ jobs:
   pub_build_macos:
     name: Publish MacOS Build
     runs-on: macOS-latest
+    needs: ci_build_and_test
     strategy:
       matrix:
         target: [MacOSX64, MacOSArm64]
