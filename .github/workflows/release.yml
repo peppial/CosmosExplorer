@@ -33,7 +33,7 @@ jobs:
         
       # Publish osx-arm64
       - name: Publish osx-arm64
-        run: (cd CosmosExplorer.Avalonia;dotnet publish -r osx-arm64 -p:Configuration=Release -p:DebugType=None -p:DebugSymbols=false -p:Version=${{env.releaseVersion}} -p:PublishSingleFile=true -p:PublishTrimmed=true -p:EnableCompressionInSingleFile=true)
+        run: (cd CosmosExplorer.Avalonia;dotnet publish -r osx-arm64 -p:Configuration=Release --self-contained -p:UseAppHost=true -p:DebugType=None -p:DebugSymbols=false -p:Version=${{env.releaseVersion}})
       #- name: Publish osx-arm64
         #run: (cd CosmosExplorer.Avalonia/bin/Release/net8.0/osx-arm64/publish ; zip -r LiteCosmosExplorer_osx-arm64.zip *)     
         #run: dotnet publish -c Release -r osx-x64 CosmosExplorer.Avalonia/CosmosExplorer.Avalonia.csproj
