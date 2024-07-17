@@ -9,6 +9,6 @@ Get-Childitem "$PSScriptRoot\..\bld\$Product.$Target\" -Exclude "LiteCosmosExplo
 & "$PSScriptRoot\Build.ps1" -Product $Product -Target $Target -Clean $False -BuildArgs "-t:Publish -p:RuntimeIdentifier=osx-arm64 -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true"
 
 # Remove unbundled 
-Remove-Item "$PSScriptRoot\..\bld\$Product.$Target\LiteCosmosExplorer"
+#Remove-Item "$PSScriptRoot\..\bld\$Product.$Target\LiteCosmosExplorer"
 
 & "$PSScriptRoot\TarRelease.ps1" -Product $Product -Target $Target
