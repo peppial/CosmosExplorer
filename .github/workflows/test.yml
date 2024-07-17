@@ -1,5 +1,11 @@
 name: Test
 
+env:
+  BuildDir: ./bld
+  ScriptDir: ./scripts
+  Product: LiteCosmosExplorer
+  Prerelease: false
+
 on:
   workflow_dispatch:
     inputs:
@@ -39,22 +45,30 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Checkout
-        uses: actions/checkout@v3
   
-      - name: Build 
-        run: scripts/BuildMacOSArm64.ps1
   
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.pub_create_github_release.outputs.upload_url }}
-          asset_path: ${{ env.BuildDir }}/LiteCosmosExplorerMacOSArm64.tar.gz
-          asset_name: LiteCosmosExplorer_OSArm64.tar.gz
-          asset_content_type: application/gzip
-        
+  pub_build_macos:
+    name: Publish MacOS Build
+    runs-on: macOS-latest
+    strategy:
+      matrix:
+        target: [MacOSX64, MacOSArm64]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Build ${{ matrix.target }}
+      run: ${{ env.ScriptDir }}/Build${{ matrix.target }}.ps1
+
+    - name: Upload ${{ matrix.target }} Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.pub_create_github_release.outputs.upload_url }}
+        asset_path: ${{ env.BuildDir }}/${{ env.Product }}.${{ matrix.target }}.tar.gz
+        asset_name: ${{ env.Product }}.${{ matrix.target }}.tar.gz
+        asset_content_type: application/gzip
 
           
     
