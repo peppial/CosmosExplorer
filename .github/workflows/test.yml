@@ -2,7 +2,7 @@ name: Test
 
 env:
   BuildDir: ./bld
-  ScriptDir: /scripts
+  ScriptDir: ./scripts
   Product: LiteCosmosExplorer
   Prerelease: false
   
