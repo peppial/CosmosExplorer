@@ -8,7 +8,7 @@ on:
         default: '0'
       minorVersion:
         required: true
-        default: '1'
+        default: '2'
 
 jobs:
   publish:
@@ -53,13 +53,13 @@ jobs:
       - name: Create DMG directory structure
         run: |
              mkdir -p dmg/LiteCosmosExplorer
-             cp -R CosmosExplorer.Avalonia/bin/Release/net8.0/osx-arm64/publis/* dmg/LiteCosmosExplorer/
+             cp -R CosmosExplorer.Avalonia/bin/Release/net8.0/osx-arm64/publish/* dmg/LiteCosmosExplorer/
     
       - name: Install CreateDMG tool
         run: brew install create-dmg
         
-     # - name: Create DMG
-     #   run: create-dmg dmg/LiteCosmosExplorer.dmg --overwrite
+      - name: Create DMG
+        run: create-dmg dmg/LiteCosmosExplorer.dmg --overwrite
 
    
         
