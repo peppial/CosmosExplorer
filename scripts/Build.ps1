@@ -3,7 +3,7 @@ param(
     [string]$Target,
     [boolean]$Clean = $True,
     [string]$BuildArgs = "",
-    [string]$ProjectPath = "src\$Product.sln"
+    [string]$ProjectPath = "CosmosExplorer.sln"
 )
 
 [string] $RepoRoot = Resolve-Path "$PSScriptRoot\.."
