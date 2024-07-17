@@ -5,6 +5,7 @@ env:
   ScriptDir: ./scripts
   Product: LiteCosmosExplorer
   Prerelease: false
+  SolutionFile: ./CosmosExplorer.sln
   
 defaults:
   run:
@@ -20,29 +21,26 @@ on:
         default: '2'
 
 jobs:
-  publish:
-    if: github.ref == 'refs/heads/master'
-    runs-on: macos-latest
-    env:
-      releaseVersion: ${{ github.event.inputs.majorVersion }}.${{ github.event.inputs.minorVersion }}.${{ github.run_number }}
+
+  ci_build_and_test:
+    name: CI Build and Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
     steps:
-      - name: Version
-        run: echo Releasing version $releaseVersion
-      - uses: actions/checkout@v2
-      - name: Setup .NET Core
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: 8.0.x
-           
-        
-     
-      # Create release
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Build Solution
+      run: dotnet build -v d --configuration ${{ matrix.configuration }} ${{ env.SolutionFile }}
+   
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
+      with:
           tag_name: ${{ env.releaseVersion }}
           release_name: ${{ env.releaseVersion }}
           draft: false
