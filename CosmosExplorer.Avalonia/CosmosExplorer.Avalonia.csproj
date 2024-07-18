@@ -9,6 +9,10 @@
         <LangVersion>12</LangVersion>
         <ApplicationIcon>Assets/avalonia-logo.ico</ApplicationIcon>
         <Platforms>AnyCPU;x86;x64;arm64</Platforms>
+        <AssemblyName>CosmosExplorer</AssemblyName>
+        <PackageId>CosmosExplorer</PackageId>
+        <Company>Cosmos Explorer</Company>
+        <Product>Cosmos Explorer</Product>
     </PropertyGroup>
 
     <ItemGroup>
