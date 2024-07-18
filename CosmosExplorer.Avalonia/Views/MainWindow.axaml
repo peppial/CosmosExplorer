@@ -6,7 +6,7 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="CosmosExplorer.Avalonia.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/favicon.ico"
+        Icon="/Assets/avalonia-logo.ico"
         RequestedThemeVariant="Light"
         Title="Lite Cosmos Explorer">
     <Design.DataContext>
