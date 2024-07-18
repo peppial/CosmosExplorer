@@ -7,8 +7,7 @@
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <LangVersion>12</LangVersion>
-        <ApplicationIcon>Assets\favicon.ico</ApplicationIcon>
-        <Platforms>AnyCPU;x86;x64;arm64</Platforms>
+        <ApplicationIcon>favicon.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
@@ -58,11 +57,22 @@
 
 
     <ItemGroup>
-        <Content Include="Assets\favicon.ico">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </Content>
         <Folder Include="Assets\*" />
         <Folder Include="Helpers\" />
         <Folder Include="Models\" />
+    </ItemGroup>
+
+
+    <ItemGroup>
+      <Content Update="favicon.ico">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
+
+    <ItemGroup>
+      <None Update="favicon.ico">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 </Project>
