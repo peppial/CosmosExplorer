@@ -85,6 +85,16 @@ jobs:
           asset_path: CosmosExplorer.Avalonia/bin/Release/net8.0/win-x64/publish/LiteCosmosExplorer_win-x64.zip
           asset_name: LiteCosmosExplorer_win-x64.zip
           asset_content_type: application/zip
+      # Upload win-x64
+      - name: Upload win-x64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: CosmosExplorer.Avalonia/bin/Release/net8.0/win-x64/publish/LiteCosmosExplorer.exe
+          asset_name: LiteCosmosExplorer.exe
+          asset_content_type: application/zip
       # Upload linux-x64
       - name: Upload linux-x64
         uses: actions/upload-release-asset@v1
