@@ -6,7 +6,7 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="CosmosExplorer.Avalonia.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/favicon.ico"
         RequestedThemeVariant="Light"
         Title="Lite Cosmos Explorer">
     <Design.DataContext>
@@ -199,7 +199,7 @@
                         <TextBox Text="{Binding ConnectionStringName}" Watermark="Connection string name" Margin="5" />
 
                         <TextBox Text="{Binding ConnectionString}" Watermark="Connection string" Margin="5" />
-                        <Button Command="{Binding SaveSettingsAsyncCommand}" Margin="5"
+                        <Button Command="{Binding AddConnectionStringAsyncCommand}" Margin="5"
                                 Content="Add Connection String" />
                         <Button Command="{Binding DeleteConnectionStringAsyncCommand}" Margin="5" 
                                 Content="Delete Selected Connection String" />

@@ -7,12 +7,12 @@
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <LangVersion>12</LangVersion>
-        <ApplicationIcon>Assets/avalonia-logo.ico</ApplicationIcon>
+        <ApplicationIcon>Assets/favicon.ico</ApplicationIcon>
         <Platforms>AnyCPU;x86;x64;arm64</Platforms>
-        <AssemblyName>CosmosExplorer</AssemblyName>
+        <AssemblyName>LiteCosmosExplorer</AssemblyName>
         <PackageId>CosmosExplorer</PackageId>
-        <Company>Cosmos Explorer</Company>
-        <Product>Cosmos Explorer</Product>
+        <Company>Lite Cosmos Explorer</Company>
+        <Product>Lite Cosmos Explorer</Product>
     </PropertyGroup>
 
     <ItemGroup>
@@ -34,10 +34,12 @@
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
         <PackageReference Include="DotNet.Bundle" Version="0.9.13" />
         <PackageReference Include="MessageBox.Avalonia" Version="3.1.5.1" />
-        <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
         <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
+        <PackageReference Include="Serilog" Version="4.0.1" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+        <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
         <PackageReference Include="Splat.Avalonia.Microsoft.Extensions.DependencyInjection" Version="14.8.12" />
         <PackageReference Include="Splat.Microsoft.Extensions.DependencyInjection" Version="14.8.12" />
     </ItemGroup>

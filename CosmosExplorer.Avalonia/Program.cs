@@ -14,6 +14,7 @@ using CosmosExplorer.Infrastructure.Connection;
 using CosmosExplorer.Infrastructure.Query;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 
 namespace CosmosExplorer.Avalonia;
 
@@ -26,13 +27,28 @@ sealed class Program
     public static void Main(string[] args)
     {
         var hostBuilder = CreateHostBuilder(args);
-        hostBuilder.RunConsoleAsync();
-        BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+        try
+        {
+            hostBuilder.RunConsoleAsync();
+            BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+        }
+        catch (Exception e)
+        {
+            Log.Fatal(e, "Error");
+            throw;
+        }
+       
     }
 
     // Avalonia configuration, don't remove; also used by visual designer.
     public static AppBuilder BuildAvaloniaApp()
     { 
+        Log.Logger = new LoggerConfiguration()
+            //.Filter.ByIncludingOnly(Matching.WithProperty("Area", LogArea.Control))
+            .MinimumLevel.Verbose()
+            .WriteTo.File("trace.txt")
+            .CreateLogger();
+        
         return AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .WithInterFont()

@@ -1,12 +1,13 @@
 using System;
 using System.IO;
-using System.Text.Json;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CosmosExplorer.Core;
 using CosmosExplorer.Core.Models;
 using CosmosExplorer.Core.State;
 using Microsoft.Azure.Cosmos;
+using Newtonsoft.Json;
 
 namespace CosmosExplorer.Avalonia.Services;
 
@@ -32,8 +33,8 @@ public class FileSystemUserSettingsService : IUserSettingsService
             await semaphore.WaitAsync();
             try
             {
-                using var settingsFileStream = new FileStream(settingsFilePath, FileMode.Open);
-                stateContainer = await JsonSerializer.DeserializeAsync<StateContainer>(settingsFileStream);            
+                stateContainer = JsonConvert.DeserializeObject<StateContainer>(await File.ReadAllTextAsync(settingsFilePath));
+
             }
             finally
             {
@@ -58,8 +59,8 @@ public class FileSystemUserSettingsService : IUserSettingsService
         await semaphore.WaitAsync();
         try
         {
-            using var settingsFileStream = new FileStream(settingsFilePath, FileMode.Create);
-            await JsonSerializer.SerializeAsync(settingsFileStream, stateContainer);
+            await File.WriteAllTextAsync(settingsFilePath, JsonConvert.SerializeObject(stateContainer));
+
         }
         finally
         {

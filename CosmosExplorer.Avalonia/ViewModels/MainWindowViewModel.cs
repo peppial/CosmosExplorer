@@ -34,7 +34,7 @@ namespace CosmosExplorer.Avalonia.ViewModels
         private int selectedTabIndex;
         private bool addConnectionString;
         public ICommand LoadSettingsAsyncCommand { get; }
-        public ICommand SaveSettingsAsyncCommand { get; }
+        public ICommand AddConnectionStringAsyncCommand { get; }
         public ICommand QueryAsyncCommand { get; }
         public ICommand NewAsyncCommand { get; }
         public ICommand SaveAsyncCommand { get; }
@@ -59,7 +59,7 @@ namespace CosmosExplorer.Avalonia.ViewModels
             this.stateContainer = stateContainer ?? throw new ArgumentNullException(nameof(stateContainer));
             
             LoadSettingsAsyncCommand = ReactiveCommand.CreateFromTask(LoadSettingsAsync);
-            SaveSettingsAsyncCommand = ReactiveCommand.CreateFromTask(SaveSettingsAsync);
+            AddConnectionStringAsyncCommand = ReactiveCommand.CreateFromTask(AddConnectionStringAsync);
             QueryAsyncCommand = ReactiveCommand.CreateFromTask(QueryAsync); 
             NewAsyncCommand = ReactiveCommand.CreateFromTask(NewAsync); 
             SaveAsyncCommand = ReactiveCommand.CreateFromTask(SaveAsync); 
@@ -209,7 +209,7 @@ namespace CosmosExplorer.Avalonia.ViewModels
             
         }
 
-        private async Task SaveSettingsAsync()
+        private async Task AddConnectionStringAsync()
         {
             var addedConnectionString = new PreferenceConnectionString(connectionStringName, connectionString, true, false);
             stateContainer.ConnectionStrings.Add(addedConnectionString);
