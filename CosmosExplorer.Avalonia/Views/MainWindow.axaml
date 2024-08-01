@@ -7,7 +7,7 @@
         x:Class="CosmosExplorer.Avalonia.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/favicon.ico"
-        RequestedThemeVariant="Light"
+        RequestedThemeVariant="Light" 
         Title="Lite Cosmos Explorer">
     <Design.DataContext>
         <vm:MainWindowViewModel />
