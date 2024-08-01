@@ -18,8 +18,8 @@ namespace CosmosExplorer.Avalonia.ViewModels
     {
         private readonly IUserSettingsService userSettingsService;
         private readonly ICosmosDBDocumentService cosmosDbDocumentService;
-        private IStateContainer stateContainer;
-        
+        private readonly IStateContainer stateContainer;
+
         private bool isBusy;
         private string errorMessage;
         private string message;
@@ -31,11 +31,16 @@ namespace CosmosExplorer.Avalonia.ViewModels
         private PreferenceConnectionString selectedConnectionString;
         private string? connectionStringName;
         private string fullDocument;
-        private int selectedTabIndex;
+        private bool connectionsExpanded;
         private bool addConnectionString;
+        private int itemsToRetrieve = 100;
+        private readonly int itemsBatch = 100;
+        private bool isFilterExecuted = false;
+        private bool isQueryExecuted = false;
         public ICommand LoadSettingsAsyncCommand { get; }
         public ICommand AddConnectionStringAsyncCommand { get; }
-        public ICommand QueryAsyncCommand { get; }
+        public ICommand FilterAsyncCommand { get; }
+        public ICommand ExecuteAsyncCommand { get; }
         public ICommand NewAsyncCommand { get; }
         public ICommand SaveAsyncCommand { get; }
 
@@ -43,48 +48,70 @@ namespace CosmosExplorer.Avalonia.ViewModels
 
         public ICommand GetDocumentAsyncCommand { get; }
         public ICommand ChangeConnectionStringCommand { get; }
-        
+
         public ICommand DeleteConnectionStringAsyncCommand { get; }
         public ICommand ReLoadAsyncCommand { get; }
-        
+        public ICommand LoadMoreFilterAsyncCommand { get; }
+        public ICommand LoadMoreQueryAsyncCommand { get; }
+
         public ObservableCollection<DocumentViewModel> Documents { get; set; } = [];
-        public ObservableCollection<DatabaseViewModel> Databases { get; set; } = []; 
+        public ObservableCollection<DatabaseViewModel> Databases { get; set; } = [];
         public ObservableCollection<PreferenceConnectionString> ConnectionStrings { get; set; } = [];
         public ObservableCollection<string> LastQueries { get; set; } = [];
 
-        public MainWindowViewModel(IUserSettingsService userSettingsService, ICosmosDBDocumentService cosmosDbDocumentService,IStateContainer stateContainer )
+        public MainWindowViewModel(IUserSettingsService userSettingsService,
+            ICosmosDBDocumentService cosmosDbDocumentService, IStateContainer stateContainer)
         {
-            this.userSettingsService = userSettingsService ?? throw new ArgumentNullException(nameof(userSettingsService));
-            this.cosmosDbDocumentService = cosmosDbDocumentService ?? throw new ArgumentNullException(nameof(cosmosDbDocumentService));
+            this.userSettingsService =
+                userSettingsService ?? throw new ArgumentNullException(nameof(userSettingsService));
+            this.cosmosDbDocumentService = cosmosDbDocumentService ??
+                                           throw new ArgumentNullException(nameof(cosmosDbDocumentService));
             this.stateContainer = stateContainer ?? throw new ArgumentNullException(nameof(stateContainer));
-            
+
             LoadSettingsAsyncCommand = ReactiveCommand.CreateFromTask(LoadSettingsAsync);
             AddConnectionStringAsyncCommand = ReactiveCommand.CreateFromTask(AddConnectionStringAsync);
-            QueryAsyncCommand = ReactiveCommand.CreateFromTask(QueryAsync); 
-            NewAsyncCommand = ReactiveCommand.CreateFromTask(NewAsync); 
-            SaveAsyncCommand = ReactiveCommand.CreateFromTask(SaveAsync); 
-            DeleteAsyncCommand = ReactiveCommand.CreateFromTask(DeleteAsync); 
+            FilterAsyncCommand = ReactiveCommand.CreateFromTask<bool>(FilterAsync);
+            NewAsyncCommand = ReactiveCommand.CreateFromTask(NewAsync);
+            SaveAsyncCommand = ReactiveCommand.CreateFromTask(SaveAsync);
+            DeleteAsyncCommand = ReactiveCommand.CreateFromTask(DeleteAsync);
             GetDocumentAsyncCommand = ReactiveCommand.CreateFromTask(GetDocumentAsync);
-            ChangeConnectionStringCommand = ReactiveCommand.CreateFromTask(ChangeConnectionStringAsync); 
-            DeleteConnectionStringAsyncCommand = ReactiveCommand.CreateFromTask(DeleteConnectionStringAsync); 
-            ReLoadAsyncCommand = ReactiveCommand.CreateFromTask(ReloadAsync); 
+            ChangeConnectionStringCommand = ReactiveCommand.CreateFromTask(ChangeConnectionStringAsync);
+            DeleteConnectionStringAsyncCommand = ReactiveCommand.CreateFromTask(DeleteConnectionStringAsync);
+            ReLoadAsyncCommand = ReactiveCommand.CreateFromTask(ReloadAsync);
+            ExecuteAsyncCommand = ReactiveCommand.CreateFromTask<bool>(QueryAsync);
+            LoadMoreFilterAsyncCommand = ReactiveCommand.CreateFromTask(LoadMoreFilterAsync);
+            LoadMoreQueryAsyncCommand = ReactiveCommand.CreateFromTask(LoadMoreQueryAsync);
             LoadSettingsAsyncCommand.Execute(null);
         }
+
         public bool IsBusy
         {
             get => isBusy;
             set => this.RaiseAndSetIfChanged(ref isBusy, value);
         }
-        
+
+        public bool IsFilterExecuted
+        {
+            get => isFilterExecuted;
+            set => this.RaiseAndSetIfChanged(ref isFilterExecuted, value);
+        }
+
+        public bool IsQueryExecuted
+        {
+            get => isQueryExecuted;
+            set => this.RaiseAndSetIfChanged(ref isQueryExecuted, value);
+        }
+
         public string ErrorMessage
         {
             get => errorMessage;
-            set=>this.RaiseAndSetIfChanged(ref errorMessage, value); 
+            set => this.RaiseAndSetIfChanged(ref errorMessage, value);
         }
+
         public string Message
         {
             get => message;
-            set =>this.RaiseAndSetIfChanged(ref message, value); 
+            set => this.RaiseAndSetIfChanged(ref message, value);
         }
 
         public string? ConnectionString
@@ -92,28 +119,31 @@ namespace CosmosExplorer.Avalonia.ViewModels
             get => connectionString;
             set => this.RaiseAndSetIfChanged(ref connectionString, value);
         }
-        
+
         public string? ConnectionStringName
         {
             get => connectionStringName;
             set => this.RaiseAndSetIfChanged(ref connectionStringName, value);
         }
+
         public string? FullDocument
         {
             get => fullDocument;
             set => this.RaiseAndSetIfChanged(ref fullDocument, value);
         }
+
         public string? Filter
         {
             get => filter;
             set => this.RaiseAndSetIfChanged(ref filter, value);
         }
+
         public string? Query
         {
             get => query;
             set => this.RaiseAndSetIfChanged(ref query, value);
         }
-        
+
         public DocumentViewModel? SelectedDocument
         {
             get => selectedDocument;
@@ -122,10 +152,11 @@ namespace CosmosExplorer.Avalonia.ViewModels
                 if (selectedDocument == value)
                     return;
                 selectedDocument = value;
-                
+
                 GetDocumentAsyncCommand.Execute(null);
             }
         }
+
         public DatabaseViewModel? SelectedDatabase
         {
             get => selectedDatabase;
@@ -140,6 +171,7 @@ namespace CosmosExplorer.Avalonia.ViewModels
                 this.RaiseAndSetIfChanged(ref selectedDatabase, value);
             }
         }
+
         public PreferenceConnectionString SelectedConnectionString
         {
             get => selectedConnectionString;
@@ -151,29 +183,31 @@ namespace CosmosExplorer.Avalonia.ViewModels
                 ChangeConnectionStringCommand.Execute(null);
             }
         }
-        public int SelectedTabIndex
+
+        public bool ConnectionsExpanded
         {
-            get => selectedTabIndex;
-            set => this.RaiseAndSetIfChanged(ref selectedTabIndex, value);
+            get => connectionsExpanded;
+            set => this.RaiseAndSetIfChanged(ref connectionsExpanded, value);
         }
+
         public bool AddConnectionString
         {
             get => addConnectionString;
             set => this.RaiseAndSetIfChanged(ref addConnectionString, value);
         }
-        
+
         private async Task LoadSettingsAsync()
         {
             var loaded = await userSettingsService.GetSettingsAsync();
             stateContainer.ConnectionStrings = loaded.ConnectionStrings;
             stateContainer.ConnectionString = loaded.ConnectionString;
             AddConnectionString = string.IsNullOrEmpty(stateContainer.ConnectionString);
-            if(AddConnectionString) SelectedTabIndex = 1;
-            
+            if (AddConnectionString) ConnectionsExpanded = true;
+
             stateContainer.LastQueries = loaded.LastQueries;
             SelectedConnectionString = loaded.ConnectionStrings.FirstOrDefault(c => c.Selected);
 
-            ConnectionStrings = new (this.stateContainer.ConnectionStrings);
+            ConnectionStrings = new(this.stateContainer.ConnectionStrings);
         }
 
         private async Task ReloadAsync()
@@ -185,40 +219,38 @@ namespace CosmosExplorer.Avalonia.ViewModels
             try
             {
                 var databases = await cosmosDbDocumentService.GetDatabasesAsync();
-             
+
                 foreach (var database in databases.OrderBy(x => x.Id))
                 {
-
                     foreach (var container in database.Containers.OrderBy(x => x.Id))
                     {
                         Databases.Add((database.Id, container.Id));
                     }
                 }
-                if(Databases.Count>0) SelectedDatabase = Databases[0];
-                this.RaisePropertyChanged(nameof(SelectedDatabase)); 
-                
+
+                if (Databases.Count > 0) SelectedDatabase = Databases[0];
+                this.RaisePropertyChanged(nameof(SelectedDatabase));
+
                 ReloadLastQueries();
             }
             catch (Exception e)
             {
                 ErrorMessage = e.Message;
-
             }
-            IsBusy = false;
 
-            
+            IsBusy = false;
         }
 
         private async Task AddConnectionStringAsync()
         {
-            var addedConnectionString = new PreferenceConnectionString(connectionStringName, connectionString, true, false);
+            var addedConnectionString =
+                new PreferenceConnectionString(connectionStringName, connectionString, true, false);
             stateContainer.ConnectionStrings.Add(addedConnectionString);
             await userSettingsService.SaveSettingsAsync(stateContainer);
             ConnectionStrings.Add(addedConnectionString);
             ConnectionStringName = ConnectionString = "";
             SelectedConnectionString = addedConnectionString;
 
-            SelectedTabIndex = 0;
             AddConnectionString = false;
         }
 
@@ -235,35 +267,85 @@ namespace CosmosExplorer.Avalonia.ViewModels
                 stateContainer.ConnectionStrings.RemoveAt(index);
                 await userSettingsService.SaveSettingsAsync(stateContainer);
                 ConnectionStringName = ConnectionString = "";
-                SelectedTabIndex = 0;
                 await LoadSettingsAsync();
             }
         }
-        private async Task QueryAsync()
+
+        private async Task FilterAsync(bool loadmore = false)
         {
             IsBusy = true;
             ErrorMessage = "";
-            Message = "";
+
+            if (!loadmore)
+            {
+                IsFilterExecuted = false;
+                itemsToRetrieve = itemsBatch;
+            }
+
             try
             {
                 await SetContainerAsync();
-                
-                (var result, int count, double runits) = (await cosmosDbDocumentService.QueryAsync(filter, 100));
+
+                (var result, int count, double runits) =
+                    (await cosmosDbDocumentService.QueryAsync(filter, itemsToRetrieve));
                 selectedDocument = null;
                 Documents.Clear();
                 Documents.AddRange(result.Select(x => new DocumentViewModel(x.Item1, x.Item2)));
                 AddLastQuery(filter);
                 await userSettingsService.SaveSettingsAsync(stateContainer);
                 Message = $"{count} items retrieved, {runits:0.##} RUs";
-
             }
             catch (Exception e)
             {
                 ErrorMessage = e.Message;
-
+                Message = "";
             }
-            IsBusy = false;
 
+            IsFilterExecuted = true;
+            IsBusy = false;
+        }
+
+        private async Task QueryAsync(bool loadmore = false)
+        {
+            IsBusy = true;
+            ErrorMessage = "";
+            if (!loadmore)
+            {
+                IsQueryExecuted = false;
+                itemsToRetrieve = itemsBatch;
+            }
+
+            try
+            {
+                await SetContainerAsync();
+
+                (var result, int count, double runits) =
+                    (await cosmosDbDocumentService.QueryAsync(query, itemsToRetrieve));
+                selectedDocument = null;
+
+
+                Message = $"{count} items retrieved, {runits:0.##} RUs";
+            }
+            catch (Exception e)
+            {
+                ErrorMessage = e.Message;
+                Message = "";
+            }
+
+            IsQueryExecuted = true;
+            IsBusy = false;
+        }
+
+        private async Task LoadMoreFilterAsync()
+        {
+            itemsToRetrieve += itemsBatch;
+            await FilterAsync(true);
+        }
+
+        private async Task LoadMoreQueryAsync()
+        {
+            itemsToRetrieve += itemsBatch;
+            await QueryAsync(true);
         }
 
         private async Task SetContainerAsync()
@@ -303,7 +385,7 @@ namespace CosmosExplorer.Avalonia.ViewModels
                              """
                         );
                     }
-                    
+
                     if (partition.PartitionName3 is not null)
                     {
                         newDoc.Append(
@@ -313,8 +395,9 @@ namespace CosmosExplorer.Avalonia.ViewModels
                              """
                         );
                     }
+
                     newDoc.Append("""
-                                  
+
                                   }
                                   """);
                 }
@@ -326,11 +409,9 @@ namespace CosmosExplorer.Avalonia.ViewModels
             catch (Exception e)
             {
                 ErrorMessage = e.Message;
-
             }
 
             IsBusy = false;
-
         }
 
         private async Task SaveAsync()
@@ -341,28 +422,25 @@ namespace CosmosExplorer.Avalonia.ViewModels
             try
             {
                 await SetContainerAsync();
-                
-                FullDocument = await cosmosDbDocumentService.UpdateDocumentAsync(selectedDocument?.Id, selectedDocument?.Partition, FullDocument);
+
+                FullDocument = await cosmosDbDocumentService.UpdateDocumentAsync(selectedDocument?.Id,
+                    selectedDocument?.Partition, FullDocument);
             }
             catch (Exception e)
             {
                 ErrorMessage = e.Message;
-
             }
-                
-            Message = (selectedDocument is null)?"Document is added.":"Document is updated.";
-            IsBusy = false;
 
+            Message = (selectedDocument is null) ? "Document is added." : "Document is updated.";
+            IsBusy = false;
         }
+
         private async Task DeleteAsync()
         {
-            
             ErrorMessage = "";
             Message = "";
             try
             {
-                //await SetContainerAsync();
-                
                 var box = MessageBoxManager
                     .GetMessageBoxStandard("Delete?", "Are you sure you want to delete the document?",
                         ButtonEnum.YesNo);
@@ -372,30 +450,31 @@ namespace CosmosExplorer.Avalonia.ViewModels
                 {
                     IsBusy = true;
                     await cosmosDbDocumentService.DeleteDocumentAsync(selectedDocument.Id, selectedDocument.Partition);
-                    await QueryAsync();
+                    await FilterAsync();
                     Message = "Document is deleted.";
                 }
             }
             catch (Exception e)
             {
                 ErrorMessage = e.Message;
-
             }
-           
-            IsBusy = false;
 
+            IsBusy = false;
         }
+
         private void AddLastQuery(string query)
         {
             if (string.IsNullOrEmpty(query)) return;
             var list = stateContainer.LastQueries;
             if (list.Count > 0 && list[0].Query == query) return;
-            var item = new LastQuery(query,stateContainer.ConnectionString, stateContainer.Database, stateContainer.Container);
+            var item = new LastQuery(query, stateContainer.ConnectionString, stateContainer.Database,
+                stateContainer.Container);
             var itemToRemove = list.FirstOrDefault(q => q.Query == query && q.Database == stateContainer.Database
-                                                                 && q.Container == stateContainer.Container &&
-                                                                 q.ConnectionString == stateContainer.ConnectionString);
+                                                                         && q.Container == stateContainer.Container &&
+                                                                         q.ConnectionString ==
+                                                                         stateContainer.ConnectionString);
             if (itemToRemove is not null) list.Remove(itemToRemove);
-            
+
             list.Insert(0, item);
             if (list.Count > 10) list.RemoveAt(10);
             stateContainer.LastQueries = list;
@@ -404,7 +483,8 @@ namespace CosmosExplorer.Avalonia.ViewModels
 
         private async Task GetDocumentAsync()
         {
-            FullDocument = await cosmosDbDocumentService.GetDocumentAsync(selectedDocument?.Id,selectedDocument?.Partition);
+            FullDocument =
+                await cosmosDbDocumentService.GetDocumentAsync(selectedDocument?.Id, selectedDocument?.Partition);
         }
 
         private async Task ChangeConnectionStringAsync()
@@ -428,20 +508,20 @@ namespace CosmosExplorer.Avalonia.ViewModels
                 stateContainer.ConnectionStrings[i] = stateContainer.ConnectionStrings[i] with
                 {
                     Selected =
-                    selectedConnectionString.ConnectionString==stateContainer.ConnectionStrings[i].ConnectionString
+                    selectedConnectionString.ConnectionString == stateContainer.ConnectionStrings[i].ConnectionString
                 };
             }
         }
 
         private void ReloadLastQueries()
         {
-            if(selectedDatabase is null) return;
+            if (selectedDatabase is null) return;
             LastQueries.Clear();
             LastQueries.Add(stateContainer.LastQueries.Where(c =>
                 c.Database == selectedDatabase.Database
                 && c.Container == selectedDatabase.Container
                 && c.ConnectionString == SelectedConnectionString.ConnectionString
-            ).Select(x => x.Query).ToArray()); 
+            ).Select(x => x.Query).ToArray());
         }
     }
 }
