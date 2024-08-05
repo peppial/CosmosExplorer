@@ -216,7 +216,7 @@
             try
             {
                 currentCount = initialCount;
-                (result, count) = await CosmosDBDocumentService.QueryAsync(query.Query, currentCount);
+                (result, count) = await CosmosDBDocumentService.FilterAsync(query.Query, currentCount);
                 query = query with
                 {
                     ConnectionString = stateContainer.ConnectionString,
@@ -240,7 +240,7 @@
             try
             {
                 currentCount += initialCount;
-                (result, count) = await CosmosDBDocumentService.QueryAsync(query.Query, currentCount);
+                (result, count) = await CosmosDBDocumentService.FilterAsync(query.Query, currentCount);
                 AddLastQuery(query);
             }
             catch (Exception e)

@@ -5,8 +5,6 @@ VisualStudioVersion = 17.0.31611.283
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CosmosExplorer.Core", "CosmosExplorer.Core\CosmosExplorer.Core.csproj", "{A31714F5-330B-4BCE-ACFD-F69B6FEFF044}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CosmosExplorer.Blazor", "CosmosExplorer.Blazor\CosmosExplorer.Blazor.csproj", "{98AD8C95-CBB3-4FDD-BDF6-81313D0E640E}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CosmosExplorer.Infrastructure", "CosmosExplorer.Infrastructure\CosmosExplorer.Infrastructure.csproj", "{3A98F476-FEB5-45AC-886F-C4E69EEF461F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CosmosExplorer.Domain", "CosmosExplorer.Domain\CosmosExplorer.Domain.csproj", "{5C30FD97-5F25-47C7-8F53-1FE4E2C51475}"
@@ -23,8 +21,6 @@ Global
 		{A31714F5-330B-4BCE-ACFD-F69B6FEFF044}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A31714F5-330B-4BCE-ACFD-F69B6FEFF044}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A31714F5-330B-4BCE-ACFD-F69B6FEFF044}.Release|Any CPU.Build.0 = Release|Any CPU
-		{98AD8C95-CBB3-4FDD-BDF6-81313D0E640E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{98AD8C95-CBB3-4FDD-BDF6-81313D0E640E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3A98F476-FEB5-45AC-886F-C4E69EEF461F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3A98F476-FEB5-45AC-886F-C4E69EEF461F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3A98F476-FEB5-45AC-886F-C4E69EEF461F}.Release|Any CPU.ActiveCfg = Release|Any CPU

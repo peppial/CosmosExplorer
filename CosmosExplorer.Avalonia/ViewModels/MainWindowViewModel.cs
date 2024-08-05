@@ -287,7 +287,7 @@ namespace CosmosExplorer.Avalonia.ViewModels
                 await SetContainerAsync();
 
                 (var result, int count, double runits) =
-                    (await cosmosDbDocumentService.QueryAsync(filter, itemsToRetrieve));
+                    (await cosmosDbDocumentService.FilterAsync(filter, itemsToRetrieve));
                 selectedDocument = null;
                 Documents.Clear();
                 Documents.AddRange(result.Select(x => new DocumentViewModel(x.Item1, x.Item2)));
@@ -321,6 +321,7 @@ namespace CosmosExplorer.Avalonia.ViewModels
 
                 (var result, int count, double runits) =
                     (await cosmosDbDocumentService.QueryAsync(query, itemsToRetrieve));
+                FullDocument = result;
                 selectedDocument = null;
 
 

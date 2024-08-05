@@ -13,10 +13,6 @@
         <PackageId>CosmosExplorer</PackageId>
         <Company>Lite Cosmos Explorer</Company>
         <Product>Lite Cosmos Explorer</Product>
-        <PublishSingleFile>true</PublishSingleFile>
-        <SelfContained>true</SelfContained>
-        <PublishTrimmed>false</PublishTrimmed>
-        <PublishReadyToRun>true</PublishReadyToRun>
     </PropertyGroup>
 
     <ItemGroup>
@@ -69,7 +65,6 @@
 
     <ItemGroup>
         <Folder Include="Assets\*" />
-        <Folder Include="Helpers\" />
         <Folder Include="Models\" />
     </ItemGroup>
 
