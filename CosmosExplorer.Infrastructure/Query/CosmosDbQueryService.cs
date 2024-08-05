@@ -32,7 +32,7 @@ namespace CosmosExplorer.Infrastructure.Query
 
             return response.Resource.ToString();
         }
-        public async Task<QueryResultModel<IReadOnlyCollection<IDocumentModel>>> QueryAsync(string filter, int maxItems, CancellationToken cancellationToken)
+        public async Task<QueryResultModel<IReadOnlyCollection<IDocumentModel>>> FilterAsync(string filter, int maxItems, CancellationToken cancellationToken)
         {
             filter = filter.RemoveSpecialCharacters();
             var result = new QueryResultModel<IReadOnlyCollection<IDocumentModel>>();
@@ -71,7 +71,7 @@ namespace CosmosExplorer.Infrastructure.Query
             
             using (var resultSet = connectionService.container.GetItemQueryIterator<DocumentModel>(
                 queryText: sql,
-                //continuationToken: continuationToken,
+                continuationToken: continuationToken,
                 requestOptions: options))
             {
                 while (resultSet.HasMoreResults && items.Count < maxItems)
@@ -90,7 +90,42 @@ namespace CosmosExplorer.Infrastructure.Query
             result.Items = items;
             return result;
         }
-        
+
+        public async Task<QueryResultModel<IReadOnlyCollection<object>>> QueryAsync(string query, int maxItems, CancellationToken cancellationToken)
+        {
+            query = query.RemoveSpecialCharacters();
+            var result = new QueryResultModel<IReadOnlyCollection<dynamic>>();
+            
+            
+            var options = new QueryRequestOptions
+            {
+                MaxItemCount = maxItems,
+            };
+            double requestChange = 0;
+            string continuationToken = null;
+            List<dynamic> items = [];
+            
+            using (var resultSet = connectionService.container.GetItemQueryIterator<dynamic>(
+                queryText: query,
+                continuationToken: continuationToken,
+                requestOptions: options))
+            {
+                while (resultSet.HasMoreResults && items.Count < maxItems)
+                {
+                    var response = await resultSet.ReadNextAsync(cancellationToken);
+
+                    requestChange += response.RequestCharge;
+                    continuationToken = response.ContinuationToken;
+                    items.AddRange( response.Resource.ToArray());
+                    //result.Headers = response.Headers.ToDictionary();
+                }
+            }
+
+            result.RequestCharge = requestChange;
+            result.ContinuationToken = continuationToken;
+            result.Items = items;
+            return result;        
+        }
     }
 }
 

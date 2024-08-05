@@ -7,7 +7,7 @@
         x:Class="CosmosExplorer.Avalonia.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/favicon.ico"
-        RequestedThemeVariant="Light" 
+        RequestedThemeVariant="Light"
         Title="Lite Cosmos Explorer">
     <Design.DataContext>
         <vm:MainWindowViewModel />
@@ -157,47 +157,45 @@
                     </StackPanel>
                 </TabItem>
                 <TabItem Header="Query" FontSize="16">
-                    <Grid RowDefinitions="1*,2*" ColumnDefinitions="1*">
-                        <StackPanel Grid.Column="0" Grid.Row="0"
-                                    Spacing="5" Margin="5">
+                    <StackPanel Grid.Column="0" Grid.Row="0"
+                                Spacing="5" Margin="5">
 
-                            <AutoCompleteBox Margin="5" x:Name="query" ItemsSource="{Binding LastQueries}"
-                                             Text="{Binding Query}"
-                                             FilterMode="StartsWith" />
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"></ColumnDefinition>
-                                    <ColumnDefinition Width="*"></ColumnDefinition>
-                                    <ColumnDefinition Width="*"></ColumnDefinition>
-                                    <ColumnDefinition Width="*"></ColumnDefinition>
-                                </Grid.ColumnDefinitions>
+                        <AutoCompleteBox Margin="5" x:Name="query" ItemsSource="{Binding LastQueries}"
+                                         Text="{Binding Query}"
+                                         FilterMode="StartsWith" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
 
-                                <Button Margin="3" Grid.Column="0" Command="{Binding ExecuteAsyncCommand}"
-                                        Content="Execute" />
-                            </Grid>
-                            <TextBox Background="Transparent" Foreground="Green" VerticalAlignment="Top"
-                                     BorderThickness="0"
-                                     Text="{Binding Message}"
-                                     IsReadOnly="True"
-                                     TextWrapping="Wrap" />
-                            <HyperlinkButton Margin="3" Command="{Binding LoadMoreQueryAsyncCommand}"
-                                             IsVisible="{Binding IsQueryExecuted}">
-                                <TextBlock TextDecorations="Underline" Cursor="Hand">Load more</TextBlock>
-                            </HyperlinkButton>
+                            <Button Margin="3" Grid.Column="0" Command="{Binding ExecuteAsyncCommand}"
+                                    Content="Execute" />
+                        </Grid>
+                        <TextBox Background="Transparent" Foreground="Green" VerticalAlignment="Top"
+                                 BorderThickness="0"
+                                 Text="{Binding Message}"
+                                 IsReadOnly="True"
+                                 TextWrapping="Wrap" />
+                        <HyperlinkButton Margin="3" Command="{Binding LoadMoreQueryAsyncCommand}"
+                                         IsVisible="{Binding IsQueryExecuted}">
+                            <TextBlock TextDecorations="Underline" Cursor="Hand">Load more</TextBlock>
+                        </HyperlinkButton>
 
-                            <TextBox Background="Transparent" Foreground="#990000"
-                                     BorderThickness="0"
-                                     Text="{Binding ErrorMessage}"
-                                     IsReadOnly="True"
-                                     TextWrapping="Wrap" />
+                        <TextBox Background="Transparent" Foreground="#990000"
+                                 BorderThickness="0"
+                                 Text="{Binding ErrorMessage}"
+                                 IsReadOnly="True"
+                                 TextWrapping="Wrap" />
 
-                            <ProgressBar Height="20" Width="20"
-                                         IsIndeterminate="{Binding IsBusy}"
-                                         IsVisible="{Binding IsBusy}"
-                                         Foreground="LightBlue"
-                                         ShowProgressText="False" VerticalAlignment="Top"
-                                         Margin="0 5" />
-                        </StackPanel>
+                        <ProgressBar Height="20" Width="20"
+                                     IsIndeterminate="{Binding IsBusy}"
+                                     IsVisible="{Binding IsBusy}"
+                                     Foreground="LightBlue"
+                                     ShowProgressText="False" VerticalAlignment="Top"
+                                     Margin="0 5" />
 
 
                         <Border Grid.Column="0" Grid.Row="1"
@@ -213,7 +211,7 @@
                                 </ScrollViewer>
                             </Grid>
                         </Border>
-                    </Grid>
+                    </StackPanel>
                 </TabItem>
             </TabControl>
         </Grid>

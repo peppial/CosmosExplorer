@@ -40,11 +40,17 @@ public class CosmosDBDocumentService : ICosmosDBDocumentService
             containerName);
     }
 
-    public async Task<(IEnumerable<(string, Partition)>, int, double)> QueryAsync(string query, int count)
+    public async Task<(IEnumerable<(string, Partition)>, int, double)> FilterAsync(string query, int count)
     {
-        var result = await queryService.QueryAsync(query, count, new CancellationToken());
+        var result = await queryService.FilterAsync(query, count, new CancellationToken());
 
         return (result.Items.Select(i => (i.Id, i.Partition)), result.Items.Count(), result.RequestCharge);
+    }
+
+    public async Task<(string, int, double)> QueryAsync(string query, int count)
+    {
+        var result = await queryService.QueryAsync(query, count, new CancellationToken());
+        return ($"[{string.Join(",\n", result.Items.Select(x => x.ToString()))}]", result.Items.Count,result.RequestCharge);
     }
 
     public async Task<string> GetDocumentAsync(string id, Partition partition)
